@@ -1,7 +1,9 @@
 package jks.lototronback.controller.login;
 
+import jks.lototronback.controller.login.dto.LoginResponse;
 import jks.lototronback.service.login.LoginService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
     private final LoginService loginService;
-    public void login(@RequestParam String username, @RequestParam String password) {
-        loginService.login(username, password);
+
+    @GetMapping("")
+    public LoginResponse login(@RequestParam String username, @RequestParam String password) {
+        LoginResponse loginResponse = loginService.login(username, password);
+        return loginResponse;
     }
 
 }
