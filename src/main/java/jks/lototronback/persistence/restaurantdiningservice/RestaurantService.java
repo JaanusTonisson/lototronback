@@ -1,8 +1,8 @@
-package jks.lototronback.persistence.restaurantservice;
+package jks.lototronback.persistence.restaurantdiningservice;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jks.lototronback.persistence.service.Service;
+import jks.lototronback.persistence.diningservice.Service;
 import jks.lototronback.persistence.restaurant.Restaurant;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "restaurant_service", schema = "lototron")
+@Table(name = "restaurant_dining_service", schema = "lototron")
 public class RestaurantService {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restaurant_service_id_gen")
