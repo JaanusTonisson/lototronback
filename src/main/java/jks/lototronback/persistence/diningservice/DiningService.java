@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "dining_service", schema = "lototron")
-public class Service {
+public class DiningService {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "service_id_gen")
     @SequenceGenerator(name = "service_id_gen", sequenceName = "service_id_seq", allocationSize = 1)
