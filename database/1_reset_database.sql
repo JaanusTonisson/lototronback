@@ -1,6 +1,6 @@
 -- Kustutab public schema (mis põhimõtteliselt kustutab kõik tabelid)
 DROP SCHEMA IF EXISTS lototron CASCADE;
--- Loob uue public schema vajalikud õigused
+-- Loob uue public schema vajalazikud õigused
 CREATE SCHEMA lototron
 -- taastab vajalikud andmebaasi õigused
     GRANT ALL ON SCHEMA lototron TO postgres;
