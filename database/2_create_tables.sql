@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2025-03-04 12:34:18.327
+-- Last modification date: 2025-03-04 13:27:24.38
 
 -- tables
 -- Table: dining_service
@@ -30,7 +30,7 @@ CREATE TABLE lunch_event (
                              user_id int  NOT NULL,
                              restaurant_id int  NOT NULL,
                              pax_total int  NOT NULL,
-                             pax_availalble int  NOT NULL,
+                             pax_available int  NOT NULL,
                              date date  NOT NULL,
                              time time  NOT NULL,
                              status varchar(1)  NOT NULL,

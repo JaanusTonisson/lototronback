@@ -37,8 +37,8 @@ public class LunchEvent {
     private Integer paxTotal;
 
     @NotNull
-    @Column(name = "pax_availalble", nullable = false)
-    private Integer paxAvailalble;
+    @Column(name = "pax_available", nullable = false)
+    private Integer paxAvailable;
 
     @NotNull
     @Column(name = "date", nullable = false)
