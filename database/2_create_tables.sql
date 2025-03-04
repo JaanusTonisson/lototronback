@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2025-03-03 11:58:12.657
+-- Last modification date: 2025-03-04 12:34:18.327
 
 -- tables
 -- Table: dining_service
@@ -79,9 +79,9 @@ CREATE TABLE restaurant (
 
 -- Table: restaurant_dining_service
 CREATE TABLE restaurant_dining_service (
-                                           id int  NOT NULL,
-                                           dining_service_id int  NOT NULL,
+                                           id serial  NOT NULL,
                                            restaurant_id int  NOT NULL,
+                                           dining_service_id int  NOT NULL,
                                            CONSTRAINT restaurant_dining_service_pk PRIMARY KEY (id)
 );
 
