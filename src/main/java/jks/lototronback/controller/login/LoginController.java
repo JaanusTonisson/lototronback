@@ -13,7 +13,7 @@ public class LoginController {
 
     private final LoginService loginService;
 
-    @GetMapping("")
+    @GetMapping("/login")
     public LoginResponse login(@RequestParam String username, @RequestParam String password) {
         LoginResponse loginResponse = loginService.login(username, password);
         return loginResponse;
