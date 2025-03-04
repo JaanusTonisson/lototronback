@@ -13,7 +13,7 @@ public class LunchEventController {
 
     private final LunchEventService lunchEventService;
 
-    @PostMapping("/lototron/loo")
+    @PostMapping("/lunch-event")
     public void addLunchEvent(@RequestBody LunchEventDto lunchEventDto) {
         lunchEventService.addLunchEvent(lunchEventDto);
     }
