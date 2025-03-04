@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LunchEventDto {
+        private Integer userId;
+        private Integer restaurantId;
+    private Integer paxTotal;
+    private Integer paxAvailalble;
 
 
 }
