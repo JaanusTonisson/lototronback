@@ -16,6 +16,7 @@ public class LunchEventService {
 
     @Transactional
     public void addLunchEvent(LunchEventDto lunchEventDto) {
+        //TODO: võta kokku kõik andmed dtost
         //TODO:
     }
 }

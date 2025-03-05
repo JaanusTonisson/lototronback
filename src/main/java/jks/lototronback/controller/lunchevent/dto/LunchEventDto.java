@@ -17,6 +17,4 @@ public class LunchEventDto {
     private Integer paxAvailable;
     private LocalDate date;
     private LocalTime time;
-        //TODO: kas siin on kõi
-
 }
