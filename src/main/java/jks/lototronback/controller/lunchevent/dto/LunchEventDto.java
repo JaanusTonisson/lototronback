@@ -15,6 +15,6 @@ public class LunchEventDto {
     private Integer restaurantId;
     private Integer paxTotal;
     private Integer paxAvailable;
-    private LocalDate date;
-    private LocalTime time;
+    private String date;
+    private String time;
 }
