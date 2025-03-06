@@ -13,7 +13,7 @@ public interface UserMapper {
     LoginResponse toLoginResponse(User user);
 
 
-    @Mapping(source = "username", target = "username")
+    @Mapping(source = "userName", target = "username")
     @Mapping(source = "password", target = "password")
     @Mapping(expression = "java(Status.ACTIVE.getCode())", target = "status")
     User toUser(NewUser newUser);

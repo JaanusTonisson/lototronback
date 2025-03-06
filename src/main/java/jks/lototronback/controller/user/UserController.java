@@ -17,7 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping("/user")
     @Operation(summary = "Uue konto registreerimine")
  public void addNewUser(@RequestBody @Validated NewUser newUser) {
      userService.addNewUser(newUser);
