@@ -24,7 +24,6 @@ public class NewUser implements Serializable {
     private String lastName;
 
     @NotNull
-    @Email
     @Size(max = 255)
     private String userName;
 
