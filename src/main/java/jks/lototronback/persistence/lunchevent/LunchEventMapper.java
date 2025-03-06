@@ -11,13 +11,6 @@ import java.time.LocalTime;
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING, imports = {Status.class})
 public interface LunchEventMapper {
 
-//    private Integer userId;
-//    private Integer restaurantId;
-//    private Integer paxTotal;
-//    private Integer paxAvailable;
-//    private LocalDate date;
-//    private LocalTime time;
-
     @Mapping(source = "paxTotal", target = "paxTotal")
     @Mapping(source = "paxAvailable", target = "paxAvailable")
     @Mapping(source = "date", target = "date", qualifiedByName = "toLocalDate")
