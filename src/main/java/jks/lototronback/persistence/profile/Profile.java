@@ -14,7 +14,7 @@ import lombok.Setter;
 public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "profile_id_gen")
-    @SequenceGenerator(name = "profile_id_gen", sequenceName = "profile_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "profile_id_gen", sequenceName = "profile_id_seq", schema = "lototron", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 

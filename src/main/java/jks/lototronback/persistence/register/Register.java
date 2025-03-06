@@ -14,7 +14,7 @@ import lombok.Setter;
 public class Register {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "register_id_gen")
-    @SequenceGenerator(name = "register_id_gen", sequenceName = "register_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "register_id_gen", sequenceName = "register_id_seq", schema = "lototron", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 

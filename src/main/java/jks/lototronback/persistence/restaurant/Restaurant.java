@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restaurant_id_gen")
-    @SequenceGenerator(name = "restaurant_id_gen", sequenceName = "restaurant_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "restaurant_id_gen", sequenceName = "restaurant_id_seq", schema = "lototron", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 

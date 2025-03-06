@@ -13,7 +13,7 @@ import lombok.Setter;
 public class IcebreakerImage {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "icebreaker_image_id_gen")
-    @SequenceGenerator(name = "icebreaker_image_id_gen", sequenceName = "icebreaker_image_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "icebreaker_image_id_gen", sequenceName = "icebreaker_image_id_seq", schema = "lototron", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 

@@ -13,7 +13,7 @@ import lombok.Setter;
 public class IcebreakerQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "icebreaker_question_id_gen")
-    @SequenceGenerator(name = "icebreaker_question_id_gen", sequenceName = "icebreaker_question_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "icebreaker_question_id_gen", sequenceName = "icebreaker_question_id_seq", schema = "lototron", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
