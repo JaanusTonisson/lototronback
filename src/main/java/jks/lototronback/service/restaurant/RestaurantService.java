@@ -24,7 +24,7 @@ public class RestaurantService {
 
     public Restaurant getValidatedRestaurant(Integer restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("restaurandId", restaurantId));
+                .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("restaurandId", restaurantId));
         return restaurant;
     }
 }

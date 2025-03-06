@@ -1,5 +1,6 @@
 package jks.lototronback.service.lunchevent;
 
+import jakarta.validation.constraints.NotNull;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
 import jks.lototronback.persistence.lunchevent.LunchEventMapper;
@@ -22,13 +23,17 @@ public class LunchEventService {
     private final RestaurantService restaurantService;
 
 
-//    @Transactional
-//    public void addLunchEvent(LunchEventDto lunchEventDto) {
-//        User user = userService.getValidatedUser(lunchEventDto.getUserId());
-//        restaurantService.findRestaurant();
-//        LunchEvent lunchEvent = lunchEventMapper.toLunchEvent(lunchEventDto);
-//        lunchEvent.setUser(user);
-//        //TODO: võta kokku kõik andmed dtost
-//        //TODO:
-//    }
+    @Transactional
+    public void addLunchEvent(@NotNull LunchEventDto lunchEventDto) {
+
+        User user = userService.getValidatedUser(lunchEventDto.getUserId());
+
+        Restaurant restaurant = restaurantService.getValidatedRestaurant(lunchEventDto.getRestaurantId());
+
+        LunchEvent lunchEvent = lunchEventMapper.toLunchEvent(lunchEventDto);
+
+        lunchEvent.setUser(user);
+        lunchEvent.setRestaurant(restaurant);
+        lunchEventRepository.save(lunchEvent);
+    }
 }

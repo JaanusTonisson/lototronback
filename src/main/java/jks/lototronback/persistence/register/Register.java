@@ -2,8 +2,8 @@ package jks.lototronback.persistence.register;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jks.lototronback.persistence.user.User;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
+import jks.lototronback.persistence.user.User;
 import lombok.Getter;
 import lombok.Setter;
 
