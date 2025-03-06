@@ -21,6 +21,7 @@ public class LunchEventService {
     @Transactional
     public void addLunchEvent(LunchEventDto lunchEventDto) {
         User user = userService.getValidatedUser(lunchEventDto.getUserId());
+
         LunchEvent lunchEvent = lunchEventMapper.toLunchEvent(lunchEventDto);
         lunchEvent.setUser(user);
         //TODO: võta kokku kõik andmed dtost

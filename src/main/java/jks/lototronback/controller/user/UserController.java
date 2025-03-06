@@ -4,8 +4,6 @@ package jks.lototronback.controller.user;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jks.lototronback.controller.user.dto.NewUser;
-import jks.lototronback.persistence.user.User;
-import jks.lototronback.persistence.user.UserRepository;
 import jks.lototronback.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
