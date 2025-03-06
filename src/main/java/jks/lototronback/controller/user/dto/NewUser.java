@@ -1,7 +1,6 @@
 package jks.lototronback.controller.user.dto;
 
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,6 @@ public class NewUser implements Serializable {
     private String lastName;
 
     @NotNull
-    @Email
     @Size(max = 255)
     private String userName;
 

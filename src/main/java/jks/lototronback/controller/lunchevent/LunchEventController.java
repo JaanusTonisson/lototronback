@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class LunchEventController {
 
-    private final LunchEventService lunchEventService;
+//    private final LunchEventService lunchEventService;
 
-    @PostMapping("/lunch-event")
-    public void addLunchEvent(@RequestBody LunchEventDto lunchEventDto) {
-        lunchEventService.addLunchEvent(lunchEventDto);
-    }
-
+//    @PostMapping("/lunch-event")
+//    public void addLunchEvent(@RequestBody LunchEventDto lunchEventDto) {
+//        lunchEventService.addLunchEvent(lunchEventDto);
+//    }
+//
 }
