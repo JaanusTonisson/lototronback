@@ -13,13 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RestaurantController {
 
+
     private final RestaurantService restaurantService;
+
     @GetMapping("/restaurants")
     public List<RestaurantInfo> getRestaurants() {
         List<RestaurantInfo> restaurants = restaurantService.getRestaurants();
         return restaurants;
-
     }
+
     @GetMapping("/restaurant")
     public Restaurant getValidatedRestaurant(Integer restaurantId) {
         Restaurant restaurant = restaurantService.getValidatedRestaurant(restaurantId);

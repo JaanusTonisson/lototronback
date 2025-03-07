@@ -16,6 +16,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final RestaurantMapper restaurantMapper;
+
     public List<RestaurantInfo> getRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         List<RestaurantInfo> restaurantInfos = restaurantMapper.toRestaurantInfos(restaurants);
