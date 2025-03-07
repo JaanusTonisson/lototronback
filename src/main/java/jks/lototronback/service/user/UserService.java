@@ -11,8 +11,10 @@ import jks.lototronback.persistence.user.UserMapper;
 import jks.lototronback.persistence.user.UserRepository;
 import jks.lototronback.validation.ValidationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -28,10 +30,12 @@ public class UserService {
 
 
     @Transactional
-    public User addNewUser(NewUser newUser) {
+    public void addNewUser(NewUser newUser) {
+        if (userRepository.existsByUsername(newUser.getUserName())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Kasutaja on juba olemas");
+        }
         User user = createAndSaveUser(newUser);
         createAndSaveProfile(newUser, user);
-        return user;
     }
 
     public User getValidatedUser(Integer userId) {
@@ -54,8 +58,8 @@ public class UserService {
     }
 
 
-    private void createAndSaveProfile (NewUser newUser, User user) {
-        Profile profile = createProfile (newUser, user);
+    private void createAndSaveProfile(NewUser newUser, User user) {
+        Profile profile = createProfile(newUser, user);
         profileRepository.save(profile);
     }
 
