@@ -34,6 +34,7 @@ public class LunchEventService {
 
         lunchEvent.setUser(user);
         lunchEvent.setRestaurant(restaurant);
+
         lunchEventRepository.save(lunchEvent);
     }
 }
