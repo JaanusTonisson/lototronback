@@ -29,6 +29,7 @@ public class UserService {
     private final ProfileRepository profileRepository;
 
 
+
     @Transactional
     public void addNewUser(NewUser newUser) {
         if (userRepository.existsByUsername(newUser.getUserName())) {
