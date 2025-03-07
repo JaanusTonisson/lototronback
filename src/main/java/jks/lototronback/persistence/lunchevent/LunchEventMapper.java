@@ -1,5 +1,6 @@
 package jks.lototronback.persistence.lunchevent;
 
+import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.status.Status;
 import jks.lototronback.util.DateTimeConverter;
@@ -7,6 +8,8 @@ import org.mapstruct.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING, imports = {Status.class})
 public interface LunchEventMapper {
@@ -30,11 +33,21 @@ public interface LunchEventMapper {
     }
 
 
-//    private Integer userId;
-//    private Integer restaurantId;
-//    private Integer paxTotal;
-//    private Integer paxAvailable;
-//    private LocalDate date;
-//    private LocalTime time;
-//    LunchEventDto toDto(LunchEvent lunchEvent);
+    @Mapping(source="id", target = "eventId")
+    @Mapping(source="user.id", target = "userId")
+    @Mapping(source="restaurant.id", target = "restaurantId")
+    @Mapping(source="paxTotal", target = "paxTotal")
+    @Mapping(source="paxAvailable", target = "paxAvailable")
+    @Mapping(source="date", target = "date")
+    @Mapping(source="time", target = "time", qualifiedByName = "toHoursMinutes")
+    @Mapping(source="restaurant.address", target = "restaurantAddress")
+    AvailableEventDto toAvailableLunchEventDto(LunchEvent lunchEvent);
+
+    List<AvailableEventDto> toAvailableLunchEventDtos(List<LunchEvent> lunchEvents);
+
+    @Named("toHoursMinutes")
+    static String toHoursMinutes(LocalTime time) {
+        return time.toString(); //võtab automaatselt sekundid maha, aga töötab vaid siis, kui sekundeid on :00 (Frondist saabki vaid HH:MM)
+    }
+
 }
