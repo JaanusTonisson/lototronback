@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -43,7 +45,14 @@ public class LunchEventService {
     }
 
     public List<AvailableEventDto> getAllAvailableLunchEvents() {
-        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableLunches(Status.ACTIVE.getCode(), 0);
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableTodayAndFutureLunches(Status.ACTIVE.getCode(), nowDate, 0);
         return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunches);
+    }
+
+    public List<AvailableEventDto> getUserAddedLunchEvents(Integer userId) {
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> userCreatedTodayAndFutureLunches = lunchEventRepository.findUserCreatedTodayAndFutureLunches(userId, nowDate, Status.ACTIVE.getCode());
+        return lunchEventMapper.toAvailableLunchEventDtos(userCreatedTodayAndFutureLunches);
     }
 }

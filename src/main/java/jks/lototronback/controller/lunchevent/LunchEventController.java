@@ -5,10 +5,7 @@ import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.service.lunchevent.LunchEventService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,9 +24,15 @@ public class LunchEventController {
     }
 
     @GetMapping("/lunch-events")
-    @Operation(summary = "Toob loodud lunch-eventid andmebaasist")
+    @Operation(summary = "Toob kõik loodud lunch-eventid andmebaasist")
     public List<AvailableEventDto> getAvailableLunchEvents() {
         return lunchEventService.getAllAvailableLunchEvents();
+    }
+
+    @GetMapping("/user-added-events")
+    @Operation(summary = "Toob kasutaja loodud lunch-eventid andmebaasist")
+    public List<AvailableEventDto> getUserAddedLunchEvents(@RequestParam Integer userId) {
+        return lunchEventService.getUserAddedLunchEvents(userId);
     }
 
 }
