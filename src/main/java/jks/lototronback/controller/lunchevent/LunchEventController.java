@@ -24,13 +24,16 @@ public class LunchEventController {
     }
 
     @GetMapping("/lunch-events")
-    @Operation(summary = "Toob kõik loodud lunch-eventid andmebaasist")
+    @Operation(summary = "Toob kõik lunch-eventid andmebaasist, millega saab liituda (alates tänasest)",
+                description = "Süsteemist otsitakse 3 parameetri alusel (is available, date alates tänasest " +
+                        "ja pax available järgi) kõik loodud lõunad, millega saab liituda")
     public List<AvailableEventDto> getAvailableLunchEvents() {
         return lunchEventService.getAllAvailableLunchEvents();
     }
 
     @GetMapping("/user-added-events")
-    @Operation(summary = "Toob kasutaja loodud lunch-eventid andmebaasist")
+    @Operation(summary = "Toob kõik kasutaja loodud lunch-eventid andmebaasist (alates tänasest)",
+                description = "Süsteemist otsitakse userId järgi ühe kasutaja loodud lõunad alates tänasest")
     public List<AvailableEventDto> getUserAddedLunchEvents(@RequestParam Integer userId) {
         return lunchEventService.getUserAddedLunchEvents(userId);
     }
