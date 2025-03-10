@@ -26,9 +26,6 @@ public class DateTimeConverter {
         return LocalDate.of(year, month, day);
     }
 
-    public static YearMonth getYearMonthFromLocalDate(LocalDate date) {
-        return YearMonth.from(date);
-    }
     public static YearMonth stringToYearMonth(String yearMonthStr) {
         String[] parts = yearMonthStr.split("-");
         int year = Integer.parseInt(parts[0]);

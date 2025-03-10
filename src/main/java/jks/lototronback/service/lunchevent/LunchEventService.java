@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -47,7 +48,7 @@ public class LunchEventService {
 
     public List<AvailableEventDto> getAllAvailableLunchEvents() {
         LocalDate nowDate = LocalDate.now();
-        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableTodayAndFutureLunches(Status.ACTIVE.getCode(), nowDate, 0);
+        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableTodayAndFutureLunches(Status.ACTIVE.getCode(), nowDate);
         return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunches);
     }
 
@@ -59,20 +60,19 @@ public class LunchEventService {
 
     public List<AvailableEventDto> getAllAvailableLunchesByDate(String nowDateString) {
         LocalDate nowDateLocal = LocalDate.parse(nowDateString);
-        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), nowDateLocal, 0);
-        return lunchEventMapper.toAvailableLunchEventsByDate(allAvailableLunchesByDate);
+        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), nowDateLocal);
+        return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunchesByDate);
     }
 
     public List<AvailableEventDto> getAllAvailableLunchesByMonth(String yearMonthStr) {
         YearMonth yearMonthObj = DateTimeConverter.stringToYearMonth(yearMonthStr);
-        LocalDate firstDayOfMonth = yearMonthObj.atDay(1);
-        List<LunchEvent> allAvailableLunchesByMonth = lunchEventRepository.findAllAvailableLunchesByMonth(firstDayOfMonth, 0, Status.ACTIVE.getCode());
-        return lunchEventMapper.toAvailableLunchesByMonth(allAvailableLunchesByMonth);
+        List<LunchEvent> allAvailableLunchesByMonth = lunchEventRepository.findAllAvailableLunchesByMonth(Status.ACTIVE.getCode(), yearMonthObj.getYear(), yearMonthObj.getMonthValue());
+        return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunchesByMonth);
     }
 
     public List<AvailableEventDto> getAllUserEventRegistrations(Integer userId) {
-        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(0, 0);
-        return lunchEventMapper.toUserEventRegistrations(userEventRegistrations);
+        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(userId);
+        return lunchEventMapper.toAvailableLunchEventDtos(userEventRegistrations);
     }
 }
 
