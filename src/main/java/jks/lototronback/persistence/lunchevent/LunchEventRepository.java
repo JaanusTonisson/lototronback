@@ -15,7 +15,13 @@ public interface LunchEventRepository extends JpaRepository<LunchEvent, Integer>
     List<LunchEvent> findUserCreatedTodayAndFutureLunches(Integer userId, LocalDate nowDate, String status);
 
     @Query("select l from LunchEvent l where l.status = ?1 and l.date = ?2 and l.paxAvailable = ?3")
-    List<LunchEvent> findAllAvailableLunchesByDate(String status, LocalDate nowDateString, Integer paxAvailable);
+    List<LunchEvent> findAllAvailableLunchesByDate(String status, LocalDate nowDate, Integer paxAvailable);
+
+    @Query("select l from LunchEvent l where l.date = ?1 and l.paxAvailable = ?2 and l.status = ?3")
+    List<LunchEvent> findAllAvailableLunchesByMonth(LocalDate date, Integer paxAvailable, String status);
+
+    @Query("select l from LunchEvent l where l.user.id = ?1 and l.id = ?2")
+    List<LunchEvent> findAllUserEventRegistrations(Integer userId, Integer eventId);
 
 
 }

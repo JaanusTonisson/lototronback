@@ -11,11 +11,13 @@ import jks.lototronback.persistence.user.User;
 import jks.lototronback.service.restaurant.RestaurantService;
 import jks.lototronback.service.user.UserService;
 import jks.lototronback.status.Status;
+import jks.lototronback.util.DateTimeConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -56,10 +58,27 @@ public class LunchEventService {
     }
 
     public List<AvailableEventDto> getAllAvailableLunchesByDate(String nowDateString) {
-        LocalDate nowDate = LocalDate.now();
-        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), LocalDate.parse(nowDateString), 0);
+        LocalDate nowDateLocal = LocalDate.parse(nowDateString);
+        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), nowDateLocal, 0);
         return lunchEventMapper.toAvailableLunchEventsByDate(allAvailableLunchesByDate);
+    }
 
+    public List<AvailableEventDto> getAllAvailableLunchesByMonth(String yearMonthStr) {
+        YearMonth yearMonthObj = DateTimeConverter.stringToYearMonth(yearMonthStr);
+        LocalDate firstDayOfMonth = yearMonthObj.atDay(1);
+        List<LunchEvent> allAvailableLunchesByMonth = lunchEventRepository.findAllAvailableLunchesByMonth(firstDayOfMonth, 0, Status.ACTIVE.getCode());
+        return lunchEventMapper.toAvailableLunchesByMonth(allAvailableLunchesByMonth);
+    }
 
+    public List<AvailableEventDto> getAllUserEventRegistrations(Integer userId) {
+        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(0, 0);
+        return lunchEventMapper.toUserEventRegistrations(userEventRegistrations);
     }
 }
+
+
+
+
+
+
+
