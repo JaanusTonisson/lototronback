@@ -20,4 +20,6 @@ public class LunchEventController {
         lunchEventService.addLunchEvent(lunchEventDto);
     }
 
+
+
 }
