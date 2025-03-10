@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -54,5 +53,13 @@ public class LunchEventService {
         LocalDate nowDate = LocalDate.now();
         List<LunchEvent> userCreatedTodayAndFutureLunches = lunchEventRepository.findUserCreatedTodayAndFutureLunches(userId, nowDate, Status.ACTIVE.getCode());
         return lunchEventMapper.toAvailableLunchEventDtos(userCreatedTodayAndFutureLunches);
+    }
+
+    public List<AvailableEventDto> getAllAvailableLunchesByDate(String nowDateString) {
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), LocalDate.parse(nowDateString), 0);
+        return lunchEventMapper.toAvailableLunchEventsByDate(allAvailableLunchesByDate);
+
+
     }
 }

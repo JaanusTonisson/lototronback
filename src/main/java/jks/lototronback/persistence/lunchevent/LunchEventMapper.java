@@ -45,6 +45,8 @@ public interface LunchEventMapper {
 
     List<AvailableEventDto> toAvailableLunchEventDtos(List<LunchEvent> lunchEvents);
 
+    List<AvailableEventDto> toAvailableLunchEventsByDate(List<LunchEvent> lunchEvents);
+
     @Named("toHoursMinutes")
     static String toHoursMinutes(LocalTime time) {
         return time.toString(); //võtab automaatselt sekundid maha, aga töötab vaid siis, kui sekundeid on :00 (Frondist saabki vaid HH:MM)
