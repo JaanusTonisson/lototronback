@@ -2,9 +2,13 @@ package jks.lototronback.controller.lunchevent;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
+import jks.lototronback.controller.lunchevent.dto.JoinLunchDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
+import jks.lototronback.persistence.register.RegisterRepository;
 import jks.lototronback.service.lunchevent.LunchEventService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.List;
 public class LunchEventController {
 
     private final LunchEventService lunchEventService;
+    private final RegisterRepository registerRepository;
 
 
     @PostMapping("/lunch-event")
@@ -69,11 +74,19 @@ public class LunchEventController {
         return lunchEventService.getUserAddedAndRegisteredLunches(userId);
     }
 
-    //TODO: lõunaga liitumine
     @PostMapping("/lunch-event/join")
-    @Operation(summary = "Liitumine lunch-eventiga")
-    public void addLunchEvent() {
+    @Operation(summary = "Liitumine lunch-eventiga",
+    description = "")
 
-
+    public ResponseEntity<String> joinLunchEvent(@RequestBody JoinLunchDto joinLunchDto) {
+        try {
+            lunchEventService.joinLunch(joinLunchDto);
+            return ResponseEntity.ok("Liitumine lõunaga õnnestus.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());  // 400 Bad Request for invalid data
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Liitumine lõunaga ebaõnnestus: " + e.getMessage()); // 500 Server Error
+        }
     }
+
 }

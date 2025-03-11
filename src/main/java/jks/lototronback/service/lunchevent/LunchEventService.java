@@ -2,10 +2,13 @@ package jks.lototronback.service.lunchevent;
 
 import jakarta.validation.constraints.NotNull;
 import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
+import jks.lototronback.controller.lunchevent.dto.JoinLunchDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
 import jks.lototronback.persistence.lunchevent.LunchEventMapper;
 import jks.lototronback.persistence.lunchevent.LunchEventRepository;
+import jks.lototronback.persistence.register.Register;
+import jks.lototronback.persistence.register.RegisterRepository;
 import jks.lototronback.persistence.restaurant.Restaurant;
 import jks.lototronback.persistence.user.User;
 import jks.lototronback.service.restaurant.RestaurantService;
@@ -28,6 +31,7 @@ public class LunchEventService {
     private final LunchEventMapper lunchEventMapper;
     private final UserService userService;
     private final RestaurantService restaurantService;
+    private final RegisterRepository registerRepository;
 
 
     @Transactional
@@ -80,13 +84,26 @@ public class LunchEventService {
         userLunches.addAll(getAllUserEventRegistrations(userId));
         return userLunches;
     }
-    //TODO: saa join lunch event
 
+    @Transactional
+    public void joinLunch(JoinLunchDto joinLunchDto) {
+        Integer userId = joinLunchDto.getUserId();
+        Integer eventId = joinLunchDto.getEventId();
 
-    public void joinLunchEvent() {
+        User user = userService.getValidatedUser(joinLunchDto.getUserId());
 
+        LunchEvent lunchEvent = lunchEventRepository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Ei leitud lõunat ID: " + eventId));
+
+        if (registerRepository.existsByUserIdAndLunchEventId(userId, eventId)) {
+            throw new IllegalArgumentException("Kasutaja on juba registreerunud sellele lõunale.");
+        }
+        Register register = new Register();
+        register.setUser(user);
+        register.setLunchEvent(lunchEvent);
+        register.setStatus(7); // Andmebaasi register tabelis ebavajalik tulp - kustutada see rida koos andmebaasi tulba kustutamisega
+        registerRepository.save(register);
     }
-
 
 }
 
