@@ -11,12 +11,13 @@ import jks.lototronback.persistence.user.User;
 import jks.lototronback.service.restaurant.RestaurantService;
 import jks.lototronback.service.user.UserService;
 import jks.lototronback.status.Status;
+import jks.lototronback.util.DateTimeConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -46,7 +47,7 @@ public class LunchEventService {
 
     public List<AvailableEventDto> getAllAvailableLunchEvents() {
         LocalDate nowDate = LocalDate.now();
-        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableTodayAndFutureLunches(Status.ACTIVE.getCode(), nowDate, 0);
+        List<LunchEvent> allAvailableLunches = lunchEventRepository.findAllAvailableTodayAndFutureLunches(Status.ACTIVE.getCode(), nowDate);
         return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunches);
     }
 
@@ -55,4 +56,43 @@ public class LunchEventService {
         List<LunchEvent> userCreatedTodayAndFutureLunches = lunchEventRepository.findUserCreatedTodayAndFutureLunches(userId, nowDate, Status.ACTIVE.getCode());
         return lunchEventMapper.toAvailableLunchEventDtos(userCreatedTodayAndFutureLunches);
     }
+
+    public List<AvailableEventDto> getAllAvailableLunchesByDate(String nowDateString) {
+        LocalDate nowDateLocal = LocalDate.parse(nowDateString);
+        List<LunchEvent> allAvailableLunchesByDate = lunchEventRepository.findAllAvailableLunchesByDate(Status.ACTIVE.getCode(), nowDateLocal);
+        return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunchesByDate);
+    }
+
+    public List<AvailableEventDto> getAllAvailableLunchesByMonth(String yearMonthStr) {
+        YearMonth yearMonthObj = DateTimeConverter.stringToYearMonth(yearMonthStr);
+        List<LunchEvent> allAvailableLunchesByMonth = lunchEventRepository.findAllAvailableLunchesByMonth(Status.ACTIVE.getCode(), yearMonthObj.getYear(), yearMonthObj.getMonthValue());
+        return lunchEventMapper.toAvailableLunchEventDtos(allAvailableLunchesByMonth);
+    }
+
+    public List<AvailableEventDto> getAllUserEventRegistrations(Integer userId) {
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(userId, nowDate);
+        return lunchEventMapper.toAvailableLunchEventDtos(userEventRegistrations);
+    }
+
+    public List<AvailableEventDto> getUserAddedAndRegisteredLunches(Integer userId) {
+        List<AvailableEventDto> userLunches = getUserAddedLunchEvents(userId);
+        userLunches.addAll(getAllUserEventRegistrations(userId));
+        return userLunches;
+    }
+    //TODO: saa join lunch event
+
+
+    public void joinLunchEvent() {
+
+    }
+
+
 }
+
+
+
+
+
+
+

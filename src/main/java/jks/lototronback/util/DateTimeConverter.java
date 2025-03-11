@@ -2,6 +2,7 @@ package jks.lototronback.util;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 
 public class DateTimeConverter {
     public static LocalTime stringToLocalTimeArray(String timeAsString) {
@@ -24,5 +25,13 @@ public class DateTimeConverter {
         int day = Integer.parseInt(dayAsString);
         return LocalDate.of(year, month, day);
     }
+
+    public static YearMonth stringToYearMonth(String yearMonthStr) {
+        String[] parts = yearMonthStr.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        return YearMonth.of(year, month);
+    }
+
     }
 

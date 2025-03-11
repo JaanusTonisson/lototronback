@@ -8,7 +8,6 @@ import org.mapstruct.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING, imports = {Status.class})
@@ -33,14 +32,14 @@ public interface LunchEventMapper {
     }
 
 
-    @Mapping(source="id", target = "eventId")
-    @Mapping(source="user.id", target = "userId")
-    @Mapping(source="restaurant.id", target = "restaurantId")
-    @Mapping(source="paxTotal", target = "paxTotal")
-    @Mapping(source="paxAvailable", target = "paxAvailable")
-    @Mapping(source="date", target = "date")
-    @Mapping(source="time", target = "time", qualifiedByName = "toHoursMinutes")
-    @Mapping(source="restaurant.address", target = "restaurantAddress")
+    @Mapping(source = "id", target = "eventId")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "restaurant.id", target = "restaurantId")
+    @Mapping(source = "paxTotal", target = "paxTotal")
+    @Mapping(source = "paxAvailable", target = "paxAvailable")
+    @Mapping(source = "date", target = "date")
+    @Mapping(source = "time", target = "time", qualifiedByName = "toHoursMinutes")
+    @Mapping(source = "restaurant.address", target = "restaurantAddress")
     AvailableEventDto toAvailableLunchEventDto(LunchEvent lunchEvent);
 
     List<AvailableEventDto> toAvailableLunchEventDtos(List<LunchEvent> lunchEvents);
