@@ -7,7 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Status {
     ACTIVE("A"),
-    DEACTIVATED("D");
+    FULL("F"),
+    DEACTIVATED("D"),
+    CANCELLED("C");
 
     private final String code;
 
