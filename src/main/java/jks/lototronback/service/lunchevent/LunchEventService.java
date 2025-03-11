@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -71,9 +70,24 @@ public class LunchEventService {
     }
 
     public List<AvailableEventDto> getAllUserEventRegistrations(Integer userId) {
-        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(userId);
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> userEventRegistrations = lunchEventRepository.findAllUserEventRegistrations(userId, nowDate);
         return lunchEventMapper.toAvailableLunchEventDtos(userEventRegistrations);
     }
+
+    public List<AvailableEventDto> getUserAddedAndRegisteredLunches(Integer userId) {
+        List<AvailableEventDto> userLunches = getUserAddedLunchEvents(userId);
+        userLunches.addAll(getAllUserEventRegistrations(userId));
+        return userLunches;
+    }
+    //TODO: saa join lunch event
+
+
+    public void joinLunchEvent() {
+
+    }
+
+
 }
 
 

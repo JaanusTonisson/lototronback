@@ -18,47 +18,62 @@ public class LunchEventController {
 
 
     @PostMapping("/lunch-event")
-    @Operation(summary = "Lisab uue lunch-eventi")
+    @Operation(summary = "Lisab uue lunch-eventi.")
     public void addLunchEvent(@RequestBody LunchEventDto lunchEventDto) {
         lunchEventService.addLunchEvent(lunchEventDto);
     }
 
     @GetMapping("/lunch-events")
-    @Operation(summary = "Toob kõik lunch-eventid andmebaasist, millega saab liituda (alates tänasest)",
+    @Operation(summary = "Kõik lunch-eventid, millega saab liituda.",
             description = "Süsteemist otsitakse 3 parameetri alusel (is active, date alates tänasest " +
-                    "ja pax available järgi) kõik loodud lõunad, millega saab liituda")
+                    "ja pax available järgi) kõik loodud lõunad, millega saab liituda.")
     public List<AvailableEventDto> getAvailableLunchEvents() {
         return lunchEventService.getAllAvailableLunchEvents();
     }
 
     @GetMapping("/user-added-events")
-    @Operation(summary = "Toob kõik kasutaja loodud lunch-eventid andmebaasist (alates tänasest)",
-            description = "Süsteemist otsitakse userId järgi ühe kasutaja loodud lõunad alates tänasest")
+    @Operation(summary = "Kõik kasutaja loodud lunch-eventid (alates tänasest).",
+            description = "Süsteemist otsitakse userId järgi ühe kasutaja loodud lõunad alates tänasest.")
     public List<AvailableEventDto> getUserAddedLunchEvents(@RequestParam Integer userId) {
         return lunchEventService.getUserAddedLunchEvents(userId);
     }
 
     @GetMapping("/lunch-events-by-date")
-    @Operation(summary = "Toob kõik ühe kuupäeva lunch-eventid andmevaasist, millega saab liituda",
-            description = "Süsteemist otsitakse 3 parameetri alusel (is active, tänane kp, pax available)")
+    @Operation(summary = "Ühe kuupäeva lõikes lunch-eventid, millega saab liituda.",
+            description = "Süsteemist otsitakse 3 parameetri alusel (is active, tänane kp, pax available).")
     public List<AvailableEventDto> getAllAvailableLunchesByDate(@RequestParam String nowDate) {
         return lunchEventService.getAllAvailableLunchesByDate(nowDate);
     }
 
-
     @GetMapping("/lunch-events-by-month")
-    @Operation(summary = "Toob ühe kuu kõik lunch-eventid andmebaasist, millega saab liituda",
-            description = "Süsteemist otsitakse 3 parameetri alusel (date, is active, pax available)")
+    @Operation(summary = "Ühe kuu lõikes lunch-eventid, millega saab liituda.",
+            description = "Süsteemist otsitakse 3 parameetri alusel (date, is active, pax available). " +
+                    "Kuvatakse alates tänasest.")
     public List<AvailableEventDto> getAllAvailableLunchesByMonth(@RequestParam String yearMonth) {
         return lunchEventService.getAllAvailableLunchesByMonth(yearMonth);
     }
 
     @GetMapping("/lunch-events/check-registration")
-    @Operation(summary = "Toob ühe kasutajaga seotud lunch-eventid andmebaasist, kuhu ta on liitunud",
-            description = "Süsteemist otsitakse register tabelist user_id -> lunch_event_id parameetri alusel")
+    @Operation(summary = "Kasutaja lunch-eventid, kuhu ta on liitunud",
+            description = "Süsteemist otsitakse register tabelist 2 parameetri alusel (user id ja lunch event id). " +
+                    "Kuvatakse alates tänasest.")
     public List<AvailableEventDto> getAllUserEventRegistrations(@RequestParam Integer userId) {
         return lunchEventService.getAllUserEventRegistrations(userId);
     }
 
+    @GetMapping("/lunch-events/added-and-registered")
+    @Operation(summary = "Kasutaja lõunad, mille ta on loonud ja millega liitunud.",
+            description = "Liidetakse kokku lõunad, mille kasutaja on loonud ja lõunad, millega ta on liitunud. " +
+                    "Kuvatakse alates tänasest.")
+    public List<AvailableEventDto> getUserAddedAndRegisteredLunches(@RequestParam Integer userId) {
+        return lunchEventService.getUserAddedAndRegisteredLunches(userId);
+    }
 
+    //TODO: lõunaga liitumine
+    @PostMapping("/lunch-event/join")
+    @Operation(summary = "Liitumine lunch-eventiga")
+    public void addLunchEvent() {
+
+
+    }
 }
