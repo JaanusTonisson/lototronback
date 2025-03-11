@@ -98,6 +98,7 @@ public class LunchEventService {
         if (registerRepository.existsByUserIdAndLunchEventId(userId, eventId)) {
             throw new IllegalArgumentException("Kasutaja on juba registreerunud sellele lõunale.");
         }
+        lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
         Register register = new Register();
         register.setUser(user);
         register.setLunchEvent(lunchEvent);
