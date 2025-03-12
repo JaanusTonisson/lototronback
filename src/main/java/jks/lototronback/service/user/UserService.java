@@ -1,6 +1,7 @@
 package jks.lototronback.service.user;
 
 import jks.lototronback.controller.user.dto.NewUser;
+import jks.lototronback.controller.user.dto.UpdatedUser;
 import jks.lototronback.persistence.profile.Profile;
 import jks.lototronback.persistence.profile.ProfileMapper;
 import jks.lototronback.persistence.profile.ProfileRepository;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 
 @Service
@@ -68,6 +71,18 @@ public class UserService {
         Profile profile = profileMapper.toProfile(newUser);
         profile.setUser(user);
         return profile;
+    }
+
+    public void updateUser(Integer userId, UpdatedUser updatedUser) {
+        User user = getValidatedUser(userId);
+        Optional<Profile> profile = profileRepository.findByUser(user);
+
+     if(profile.isPresent()) {
+         profile.get().setFirstName(updatedUser.getFirstName());
+         profile.get().setLastName(updatedUser.getLastName());
+         profile.get().setPhoneNumber(updatedUser.getPhoneNumber());
+         profileRepository.save(profile.get());
+     }
     }
 }
 

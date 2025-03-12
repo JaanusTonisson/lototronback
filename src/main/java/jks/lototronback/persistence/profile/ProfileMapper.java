@@ -2,7 +2,6 @@ package jks.lototronback.persistence.profile;
 
 
 import jks.lototronback.controller.user.dto.NewUser;
-import jks.lototronback.persistence.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
