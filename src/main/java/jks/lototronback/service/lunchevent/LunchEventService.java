@@ -88,14 +88,14 @@ public class LunchEventService {
     @Transactional
     public void joinLunch(JoinLunchDto joinLunchDto) {
         Integer userId = joinLunchDto.getUserId();
-        Integer eventId = joinLunchDto.getEventId();
+        Integer lunchEventId = joinLunchDto.getEventId();
 
         User user = userService.getValidatedUser(joinLunchDto.getUserId());
 
-        LunchEvent lunchEvent = lunchEventRepository.findById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Ei leitud lõunat ID: " + eventId));
+        LunchEvent lunchEvent = lunchEventRepository.findById(lunchEventId)
+                .orElseThrow(() -> new IllegalArgumentException("Ei leitud lõunat ID: " + lunchEventId));
 
-        if (registerRepository.existsByUserIdAndLunchEventId(userId, eventId)) {
+        if (registerRepository.existsByUserIdAndLunchEventId(userId, lunchEventId)) {
             throw new IllegalArgumentException("Kasutaja on juba registreerunud sellele lõunale.");
         }
         lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
@@ -104,6 +104,12 @@ public class LunchEventService {
         register.setLunchEvent(lunchEvent);
         register.setStatus(7); // Andmebaasi register tabelis ebavajalik tulp - kustutada see rida koos andmebaasi tulba kustutamisega
         registerRepository.save(register);
+    }
+
+    public List<AvailableEventDto> getAllUserPastEventRegistrations(Integer userId) {
+        LocalDate nowDate = LocalDate.now();
+        List<LunchEvent> userPastEventRegistrations = lunchEventRepository.findAllUserPastEventRegistrations(userId, nowDate);
+        return lunchEventMapper.toAvailableLunchEventDtos(userPastEventRegistrations);
     }
 
 }

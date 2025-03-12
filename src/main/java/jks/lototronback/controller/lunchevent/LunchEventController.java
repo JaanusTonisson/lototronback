@@ -89,4 +89,11 @@ public class LunchEventController {
         }
     }
 
+    @GetMapping("/lunch-events/past-registrations")
+    @Operation(summary = "Kasutaja möödunud lunch-eventid",
+            description = "Kuvatakse kõik kasutaja möödunud lõunad.")
+    public List<AvailableEventDto> getAllUserPastEventRegistrations(@RequestParam Integer userId) {
+        return lunchEventService.getAllUserPastEventRegistrations(userId);
+    }
+
 }

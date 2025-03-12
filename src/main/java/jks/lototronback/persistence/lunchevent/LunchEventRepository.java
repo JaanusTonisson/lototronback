@@ -21,4 +21,7 @@ public interface LunchEventRepository extends JpaRepository<LunchEvent, Integer>
 
     @Query("select l from LunchEvent l where l.id IN (select r.lunchEvent.id from Register r where r.user.id = ?1) and l.date >= ?2")
     List<LunchEvent> findAllUserEventRegistrations(Integer userId, LocalDate nowDate);
+
+    @Query("SELECT le FROM LunchEvent le " + "JOIN Register r ON r.lunchEvent.id = le.id " + "WHERE r.user.id = :userId AND le.date < :nowDate")
+    List<LunchEvent> findAllUserPastEventRegistrations(Integer userId,LocalDate nowDate);
 }
