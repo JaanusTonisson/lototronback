@@ -29,6 +29,11 @@ public class UserService {
     private final ProfileRepository profileRepository;
 
 
+    public User getValidatedUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
+        return user;
+    }
 
     @Transactional
     public void addNewUser(NewUser newUser) {
@@ -37,12 +42,6 @@ public class UserService {
         }
         User user = createAndSaveUser(newUser);
         createAndSaveProfile(newUser, user);
-    }
-
-    public User getValidatedUser(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
-        return user;
     }
 
     private User createAndSaveUser(NewUser newUser) {
@@ -69,5 +68,8 @@ public class UserService {
         profile.setUser(user);
         return profile;
     }
+
+
 }
+
 

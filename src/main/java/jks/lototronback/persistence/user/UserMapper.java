@@ -1,6 +1,7 @@
 package jks.lototronback.persistence.user;
 
 import jks.lototronback.controller.login.dto.LoginResponse;
+import jks.lototronback.controller.profile.dto.ProfileInfo;
 import jks.lototronback.controller.user.dto.NewUser;
 import jks.lototronback.status.Status;
 import org.mapstruct.*;
@@ -17,4 +18,6 @@ public interface UserMapper {
     @Mapping(source = "password", target = "password")
     @Mapping(expression = "java(Status.ACTIVE.getCode())", target = "status")
     User toUser(NewUser newUser);
+
+
 }

@@ -112,6 +112,7 @@ public class LunchEventService {
         return lunchEventMapper.toAvailableLunchEventDtos(userPastEventRegistrations);
     }
 
+
 }
 
 
