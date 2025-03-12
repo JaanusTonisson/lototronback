@@ -76,7 +76,7 @@ public class LunchEventController {
 
     @PostMapping("/lunch-event/join")
     @Operation(summary = "Liitumine lunch-eventiga",
-    description = "")
+    description = "Süsteemis lisatakse parameetrite user id ja event id alusel lõunale liituja andmebaasi register tabelisse. ")
 
     public ResponseEntity<String> joinLunchEvent(@RequestBody JoinLunchDto joinLunchDto) {
         try {
