@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class WorkdayDto {
+public class WorkdayDto {
     private LocalDate date;
     private Boolean hasAvailableLunches;
     private Integer availableLunchCount;

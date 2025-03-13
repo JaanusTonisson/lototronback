@@ -21,11 +21,11 @@ public interface RegisterRepository extends JpaRepository<Register, Integer> {
 
   @Query("SELECT r FROM Register r JOIN r.lunchEvent l WHERE r.user.id = :userId " +
           "AND ((l.date > :today) OR (l.date = :today AND l.time >= :now)) " +
-          "AND l.status != 'C' ORDER BY l.date, l.time")
+          "AND l.status != 'C' AND r.status != 'C' ORDER BY l.date, l.time")
   List<Register> findUpcomingJoinedLunchesByUserId(Integer userId, LocalDate today, LocalTime now);
 
   @Query("SELECT r FROM Register r JOIN r.lunchEvent l WHERE r.user.id = :userId " +
           "AND ((l.date < :today) OR (l.date = :today AND l.time < :now)) " +
-          "ORDER BY l.date DESC, l.time DESC")
+          "AND r.status != 'C' ORDER BY l.date DESC, l.time DESC")
   List<Register> findPastJoinedLunchesByUserId(Integer userId, LocalDate today, LocalTime now);
 }

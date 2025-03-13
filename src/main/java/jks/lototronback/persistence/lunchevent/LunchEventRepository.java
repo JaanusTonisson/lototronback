@@ -10,8 +10,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface LunchEventRepository extends JpaRepository<LunchEvent, Integer>, JpaSpecificationExecutor<LunchEvent> {
-    List<LunchEvent> findByDateAndStatusNotOrderByTime(LocalDate date, String status);
+public interface LunchEventRepository extends JpaRepository<LunchEvent, Integer> {
 
     @Query("SELECT l FROM LunchEvent l WHERE l.date = :date AND l.paxAvailable > 0 AND l.status != 'C' AND l.isAvailable = true ORDER BY l.time")
     List<LunchEvent> findAvailableLunchesByDate(LocalDate date);
@@ -22,5 +21,8 @@ public interface LunchEventRepository extends JpaRepository<LunchEvent, Integer>
     @Query("SELECT l FROM LunchEvent l WHERE l.user.id = :userId AND ((l.date < :today) OR (l.date = :today AND l.time < :now)) ORDER BY l.date DESC, l.time DESC")
     List<LunchEvent> findPastLunchesByUserId(Integer userId, LocalDate today, LocalTime now);
 
+    @Query("SELECT COUNT(l) FROM LunchEvent l WHERE l.date = :date AND l.paxAvailable > 0 AND l.status != 'C' AND l.isAvailable = true")
+    Integer countAvailableLunchesByDate(LocalDate date);
 
+    List<LunchEvent> findByDateAndStatusNotOrderByTime(LocalDate date, String status);
 }

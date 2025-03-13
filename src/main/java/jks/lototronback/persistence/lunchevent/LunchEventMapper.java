@@ -9,7 +9,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING, imports = {Status.class})
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface LunchEventMapper {
 
     @Mapping(source = "id", target = "id")
@@ -23,6 +23,8 @@ public interface LunchEventMapper {
     @Mapping(source = "time", target = "time")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "isAvailable", target = "isAvailable")
+    @Mapping(target = "isJoined", ignore = true)
+    @Mapping(target = "isCreator", ignore = true)
     LunchEventDto toLunchEventDto(LunchEvent lunchEvent);
 
     List<LunchEventDto> toLunchEventDtos(List<LunchEvent> lunchEvents);
