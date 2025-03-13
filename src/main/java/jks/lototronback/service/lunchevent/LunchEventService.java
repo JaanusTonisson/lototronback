@@ -2,6 +2,7 @@ package jks.lototronback.service.lunchevent;
 
 import jks.lototronback.controller.lunchevent.dto.CreateLunchEventRequest;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
+import jks.lototronback.infrastructure.exception.DataNotFoundException;
 import jks.lototronback.infrastructure.exception.ForbiddenException;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
 import jks.lototronback.persistence.lunchevent.LunchEventMapper;
@@ -21,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
-import static jks.lototronback.infrastructure.Error.*;
 
 @Service
 @RequiredArgsConstructor
@@ -47,12 +46,14 @@ public class LunchEventService {
         // Validate date and time
         ValidationService.validateLunchDateAndTime(request.getDate(), request.getTime());
 
+        validateTimeConflict(userId, request.getDate(), request.getTime());
+
         // Create lunch event
         LunchEvent lunchEvent = new LunchEvent();
         lunchEvent.setUser(user);
         lunchEvent.setRestaurant(restaurant);
         lunchEvent.setPaxTotal(request.getPaxTotal());
-        lunchEvent.setPaxAvailable(request.getPaxTotal() - 1); // Creator is auto-joined
+        lunchEvent.setPaxAvailable(request.getPaxTotal() - 1);
         lunchEvent.setDate(request.getDate());
         lunchEvent.setTime(request.getTime());
         lunchEvent.setStatus(Status.ACTIVE.getCode());
@@ -60,7 +61,7 @@ public class LunchEventService {
 
         lunchEventRepository.save(lunchEvent);
 
-        // Return DTO with additional fields
+        // Convert to DTO and set additional flags
         LunchEventDto dto = lunchEventMapper.toLunchEventDto(lunchEvent);
         dto.setIsCreator(true);
         dto.setIsJoined(false);
@@ -75,7 +76,7 @@ public class LunchEventService {
                 .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("lunchEventId", lunchEventId));
 
         // Verify ownership
-        ValidationService.validateUserIsLunchCreator(userId, lunchEvent);
+        ValidationService.validateLunchOwnership(userId, lunchEvent);
 
         // Validate not canceled
         ValidationService.validateLunchNotCanceled(lunchEvent);
@@ -83,32 +84,40 @@ public class LunchEventService {
         // Validate date and time
         ValidationService.validateLunchDateAndTime(request.getDate(), request.getTime());
 
+        // If time or date changed, validate for conflicts
+        if (!lunchEvent.getDate().equals(request.getDate()) || !lunchEvent.getTime().equals(request.getTime())) {
+            validateTimeConflict(userId, request.getDate(), request.getTime());
+        }
+
         // Validate restaurant
         Restaurant restaurant = restaurantRepository.findById(request.getRestaurantId())
                 .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("restaurantId", request.getRestaurantId()));
+
+        // Calculate current join count
+        int currentJoinCount = lunchEvent.getPaxTotal() - lunchEvent.getPaxAvailable();
+
+        // Ensure new pax total is sufficient
+        ValidationService.validateSufficientSeats(request.getPaxTotal(), currentJoinCount);
 
         // Update lunch event
         lunchEvent.setRestaurant(restaurant);
         lunchEvent.setDate(request.getDate());
         lunchEvent.setTime(request.getTime());
-
-        // Handle pax count changes
-        int currentJoinCount = lunchEvent.getPaxTotal() - lunchEvent.getPaxAvailable();
-
-        // Ensure new pax total is at least the current join count
-        if (request.getPaxTotal() < currentJoinCount) {
-            throw new ForbiddenException(
-                    MIN_PAX_REQUIRED.getMessage(),
-                    MIN_PAX_REQUIRED.getErrorCode()
-            );
-        }
-
         lunchEvent.setPaxTotal(request.getPaxTotal());
         lunchEvent.setPaxAvailable(request.getPaxTotal() - currentJoinCount);
 
+        // Update status if necessary
+        if (lunchEvent.getPaxAvailable() <= 0) {
+            lunchEvent.setStatus(Status.FULL.getCode());
+            lunchEvent.setIsAvailable(false);
+        } else {
+            lunchEvent.setStatus(Status.ACTIVE.getCode());
+            lunchEvent.setIsAvailable(true);
+        }
+
         lunchEventRepository.save(lunchEvent);
 
-        // Return DTO with additional fields
+        // Convert to DTO and set additional flags
         LunchEventDto dto = lunchEventMapper.toLunchEventDto(lunchEvent);
         dto.setIsCreator(true);
         dto.setIsJoined(false);
@@ -123,10 +132,10 @@ public class LunchEventService {
                 .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("lunchEventId", lunchEventId));
 
         // Verify ownership
-        ValidationService.validateUserIsLunchCreator(userId, lunchEvent);
+        ValidationService.validateLunchOwnership(userId, lunchEvent);
 
         // Update status
-        lunchEvent.setStatus(Status.DEACTIVATED.getCode());
+        lunchEvent.setStatus(Status.CANCELLED.getCode());
         lunchEvent.setIsAvailable(false);
 
         lunchEventRepository.save(lunchEvent);
@@ -150,37 +159,34 @@ public class LunchEventService {
 
         // Check if user is already joined
         if (registerRepository.existsByUserIdAndLunchEventId(userId, lunchEventId)) {
-            throw new ForbiddenException(
-                    LUNCH_ALREADY_JOINED.getMessage(),
-                    LUNCH_ALREADY_JOINED.getErrorCode()
-            );
+            throw new ForbiddenException("You have already joined this lunch event", 2007);
         }
 
         // Check if user is the creator
         if (lunchEvent.getUser().getId().equals(userId)) {
-            throw new ForbiddenException(
-                    LUNCH_EVENT_CREATOR.getMessage(),
-                    LUNCH_EVENT_CREATOR.getErrorCode()
-            );
+            throw new ForbiddenException("You are the creator of this lunch event", 2008);
         }
 
         // Create registration
         Register register = new Register();
         register.setUser(user);
         register.setLunchEvent(lunchEvent);
+        register.setStatus(Status.ACTIVE.getCode()); // Set status for registration
+
         registerRepository.save(register);
 
         // Update available spots
         lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
 
-        // If full, set as unavailable
+        // If full, update status
         if (lunchEvent.getPaxAvailable() <= 0) {
+            lunchEvent.setStatus(Status.FULL.getCode());
             lunchEvent.setIsAvailable(false);
         }
 
         lunchEventRepository.save(lunchEvent);
 
-        // Return DTO with additional fields
+        // Convert to DTO and set additional flags
         LunchEventDto dto = lunchEventMapper.toLunchEventDto(lunchEvent);
         dto.setIsCreator(false);
         dto.setIsJoined(true);
@@ -199,19 +205,18 @@ public class LunchEventService {
 
         // Find registration
         Register register = registerRepository.findByUserIdAndLunchEventId(userId, lunchEventId)
-                .orElseThrow(() -> new ForbiddenException(
-                        "You have not joined this lunch event",
-                        LUNCH_ALREADY_JOINED.getErrorCode()
-                ));
+                .orElseThrow(() -> new DataNotFoundException("You have not joined this lunch event", 2009));
 
-        // Delete registration
-        registerRepository.delete(register);
+        // Update registration status
+        register.setStatus(Status.CANCELLED.getCode());
+        registerRepository.save(register);
 
         // Update available spots
         lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() + 1);
 
-        // Make available again if it was full
-        if (!lunchEvent.getIsAvailable() && lunchEvent.getPaxAvailable() > 0) {
+        // Update lunch event status if it was full
+        if (Status.FULL.getCode().equals(lunchEvent.getStatus()) && lunchEvent.getPaxAvailable() > 0) {
+            lunchEvent.setStatus(Status.ACTIVE.getCode());
             lunchEvent.setIsAvailable(true);
         }
 
@@ -303,10 +308,58 @@ public class LunchEventService {
         return dtos;
     }
 
+    public void validateTimeConflict(Integer userId, LocalDate date, LocalTime time) {
+        // Get all lunches (both created and joined) for this user on this date
+        List<LunchEvent> createdLunches = lunchEventRepository.findByUserIdAndDate(userId, date);
+        List<Register> joinedRegisters = registerRepository.findByUserIdAndLunchEventDate(userId, date);
 
+        // Check created lunches for time conflicts
+        for (LunchEvent lunch : createdLunches) {
+            LocalTime lunchTime = lunch.getTime();
+            if (isTimeWithinInterval(time, lunchTime, 60)) {
+                throw new ForbiddenException("You already have a lunch scheduled within 60 minutes of this time", 2010);
+            }
+        }
+
+        // Check joined lunches for time conflicts
+        for (Register register : joinedRegisters) {
+            LocalTime lunchTime = register.getLunchEvent().getTime();
+            if (isTimeWithinInterval(time, lunchTime, 60)) {
+                throw new ForbiddenException("You already have a lunch scheduled within 60 minutes of this time", 2010);
+            }
+        }
+    }
+
+    // Helper method to check if two times are within a specified interval in minutes
+    private boolean isTimeWithinInterval(LocalTime time1, LocalTime time2, int minutes) {
+        long diffInMinutes = Math.abs(
+                time1.toSecondOfDay() / 60 - time2.toSecondOfDay() / 60
+        );
+        return diffInMinutes < minutes;
+    }
+
+
+    public List<LunchEventDto> getUserLunchesByDate(Integer userId, LocalDate date) {
+        // Get created lunches for the user on this date
+        List<LunchEvent> createdLunches = lunchEventRepository.findByUserIdAndDate(userId, date);
+
+        // Get joined lunches for the user on this date
+        List<Register> joinedRegisters = registerRepository.findByUserIdAndLunchEventDate(userId, date);
+
+        // Convert created lunches to DTOs
+        List<LunchEventDto> result = lunchEventMapper.toLunchEventDtos(createdLunches);
+
+        // Convert joined lunches to DTOs and add them to the result
+        List<LunchEvent> joinedLunches = joinedRegisters.stream()
+                .map(Register::getLunchEvent)
+                .toList();
+
+        // Add joined lunches to result
+        result.addAll(lunchEventMapper.toLunchEventDtos(joinedLunches));
+
+        return result;
+    }
 }
-
-
 
 
 

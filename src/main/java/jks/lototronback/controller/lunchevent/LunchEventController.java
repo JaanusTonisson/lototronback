@@ -1,7 +1,10 @@
 package jks.lototronback.controller.lunchevent;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
+import jks.lototronback.controller.lunchevent.dto.CreateLunchEventRequest;
 import jks.lototronback.controller.lunchevent.dto.JoinLunchDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.persistence.register.RegisterRepository;
@@ -11,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -19,81 +23,94 @@ import java.util.List;
 public class LunchEventController {
 
     private final LunchEventService lunchEventService;
-    private final RegisterRepository registerRepository;
 
-
-    @PostMapping("/lunch-event")
-    @Operation(summary = "Lisab uue lunch-eventi.")
-    public void addLunchEvent(@RequestBody LunchEventDto lunchEventDto) {
-        lunchEventService.addLunchEvent(lunchEventDto);
+    @PostMapping("/lunch/event")
+    @Operation(summary = "Loob uue lõuna")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lõuna edukalt loodud"),
+            @ApiResponse(responseCode = "403", description = "Valideerimine ebaõnnestus"),
+            @ApiResponse(responseCode = "404", description = "Required entity not found")
+    })
+    public LunchEventDto createLunchEvent(
+            @RequestParam Integer userId,
+            @RequestBody CreateLunchEventRequest request) {
+        return lunchEventService.createLunchEvent(userId, request);
     }
 
-    @GetMapping("/lunch-events")
-    @Operation(summary = "Kõik lunch-eventid, millega saab liituda.",
-            description = "Süsteemist otsitakse 3 parameetri alusel (is active, date alates tänasest " +
-                    "ja pax available järgi) kõik loodud lõunad, millega saab liituda.")
-    public List<AvailableEventDto> getAvailableLunchEvents() {
-        return lunchEventService.getAllAvailableLunchEvents();
+    @PutMapping("/lunch/event/{lunchEventId}")
+    @Operation(summary = "Uuendab olemasolevat lõunat")
+    public LunchEventDto updateLunchEvent(
+            @RequestParam Integer userId,
+            @PathVariable Integer lunchEventId,
+            @RequestBody CreateLunchEventRequest request) {
+        return lunchEventService.updateLunchEvent(userId, lunchEventId, request);
     }
 
-    @GetMapping("/user-added-events")
-    @Operation(summary = "Kõik kasutaja loodud lunch-eventid (alates tänasest).",
-            description = "Süsteemist otsitakse userId järgi ühe kasutaja loodud lõunad alates tänasest.")
-    public List<AvailableEventDto> getUserAddedLunchEvents(@RequestParam Integer userId) {
-        return lunchEventService.getUserAddedLunchEvents(userId);
+    @DeleteMapping("/lunch/event/{lunchEventId}")
+    @Operation(summary = "Tühistab olemasolevat lõuna")
+    public void cancelLunchEvent(
+            @RequestParam Integer userId,
+            @PathVariable Integer lunchEventId) {
+        lunchEventService.cancelLunchEvent(userId, lunchEventId);
     }
 
-    @GetMapping("/lunch-events-by-date")
-    @Operation(summary = "Ühe kuupäeva lõikes lunch-eventid, millega saab liituda.",
-            description = "Süsteemist otsitakse 3 parameetri alusel (is active, tänane kp, pax available).")
-    public List<AvailableEventDto> getAllAvailableLunchesByDate(@RequestParam String nowDate) {
-        return lunchEventService.getAllAvailableLunchesByDate(nowDate);
+    @PostMapping("/lunch/event/{lunchEventId}/join")
+    @Operation(summary = "Liitub loodud lõunaga")
+    public LunchEventDto joinLunchEvent(
+            @RequestParam Integer userId,
+            @PathVariable Integer lunchEventId) {
+        return lunchEventService.joinLunchEvent(userId, lunchEventId);
     }
 
-    @GetMapping("/lunch-events-by-month")
-    @Operation(summary = "Ühe kuu lõikes lunch-eventid, millega saab liituda.",
-            description = "Süsteemist otsitakse 3 parameetri alusel (date, is active, pax available). " +
-                    "Kuvatakse alates tänasest.")
-    public List<AvailableEventDto> getAllAvailableLunchesByMonth(@RequestParam String yearMonth) {
-        return lunchEventService.getAllAvailableLunchesByMonth(yearMonth);
+    @DeleteMapping("/lunch/event/{lunchEventId}/join")
+    @Operation(summary = "Loobub lõunal osalemisest")
+    public void cancelJoinedLunch(
+            @RequestParam Integer userId,
+            @PathVariable Integer lunchEventId) {
+        lunchEventService.cancelJoinedLunch(userId, lunchEventId);
     }
 
-    @GetMapping("/lunch-events/check-registration")
-    @Operation(summary = "Kasutaja lunch-eventid, kuhu ta on liitunud",
-            description = "Süsteemist otsitakse register tabelist 2 parameetri alusel (user id ja lunch event id). " +
-                    "Kuvatakse alates tänasest.")
-    public List<AvailableEventDto> getAllUserEventRegistrations(@RequestParam Integer userId) {
-        return lunchEventService.getAllUserEventRegistrations(userId);
+    @GetMapping("/lunch/events/available")
+    @Operation(summary = "Toob lõunad valitud päevale")
+    public List<LunchEventDto> getAvailableLunchesByDate(
+            @RequestParam Integer userId,
+            @RequestParam LocalDate date) {
+        return lunchEventService.getAvailableLunchesByDate(userId, date);
     }
 
-    @GetMapping("/lunch-events/added-and-registered")
-    @Operation(summary = "Kasutaja lõunad, mille ta on loonud ja millega liitunud.",
-            description = "Liidetakse kokku lõunad, mille kasutaja on loonud ja lõunad, millega ta on liitunud. " +
-                    "Kuvatakse alates tänasest.")
-    public List<AvailableEventDto> getUserAddedAndRegisteredLunches(@RequestParam Integer userId) {
-        return lunchEventService.getUserAddedAndRegisteredLunches(userId);
+    @GetMapping("/lunch/events/upcoming/created")
+    @Operation(summary = "Toob eesolevad lõunad, mille kasutaja on loonud")
+    public List<LunchEventDto> getUpcomingCreatedLunches(
+            @RequestParam Integer userId) {
+        return lunchEventService.getUpcomingCreatedLunches(userId);
     }
 
-    @PostMapping("/lunch-event/join")
-    @Operation(summary = "Liitumine lunch-eventiga",
-    description = "Süsteemis lisatakse parameetrite user id ja event id alusel lõunale liituja andmebaasi register tabelisse. ")
-
-    public ResponseEntity<String> joinLunchEvent(@RequestBody JoinLunchDto joinLunchDto) {
-        try {
-            lunchEventService.joinLunch(joinLunchDto);
-            return ResponseEntity.ok("Liitumine lõunaga õnnestus.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());  // 400 Bad Request for invalid data
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Liitumine lõunaga ebaõnnestus: " + e.getMessage()); // 500 Server Error
-        }
+    @GetMapping("/lunch/events/past/created")
+    @Operation(summary = "Toob minevikus toimunud lõunad, mille kasutaja on loonud")
+    public List<LunchEventDto> getPastCreatedLunches(
+            @RequestParam Integer userId) {
+        return lunchEventService.getPastCreatedLunches(userId);
     }
 
-    @GetMapping("/lunch-events/past-registrations")
-    @Operation(summary = "Kasutaja möödunud lunch-eventid",
-            description = "Kuvatakse kõik kasutaja möödunud lõunad.")
-    public List<AvailableEventDto> getAllUserPastEventRegistrations(@RequestParam Integer userId) {
-        return lunchEventService.getAllUserPastEventRegistrations(userId);
+    @GetMapping("/lunch/events/upcoming/joined")
+    @Operation(summary = "Toob eesolevad lõunad, millega kasutaja on liitunud")
+    public List<LunchEventDto> getUpcomingJoinedLunches(
+            @RequestParam Integer userId) {
+        return lunchEventService.getUpcomingJoinedLunches(userId);
     }
 
+    @GetMapping("/lunch/events/past/joined")
+    @Operation(summary = "Toob toimunud lõunad, millga kasutaja on liitunud")
+    public List<LunchEventDto> getPastJoinedLunches(
+            @RequestParam Integer userId) {
+        return lunchEventService.getPastJoinedLunches(userId);
+    }
+
+    @GetMapping("/lunch/events/user-date")
+    @Operation(summary = "Get all lunches for a user on a specific date")
+    public List<LunchEventDto> getUserLunchesByDate(
+            @RequestParam Integer userId,
+            @RequestParam LocalDate date) {
+        return lunchEventService.getUserLunchesByDate(userId, date);
+    }
 }

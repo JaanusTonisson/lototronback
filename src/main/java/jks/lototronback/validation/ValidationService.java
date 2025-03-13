@@ -3,6 +3,7 @@ package jks.lototronback.validation;
 import jks.lototronback.infrastructure.exception.DataNotFoundException;
 import jks.lototronback.infrastructure.exception.ForbiddenException;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
+import jks.lototronback.status.Status;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import static jks.lototronback.infrastructure.Error.*;
 
 public class ValidationService {
 
+    // Existing methods
     public static DataNotFoundException throwPrimaryKeyNotFoundException(String primaryKeyName, Integer value) {
         return new DataNotFoundException(PRIMARY_KEY_NOT_FOUND.getMessage() + primaryKeyName + " = " + value, PRIMARY_KEY_NOT_FOUND.getErrorCode());
     }
@@ -21,71 +23,52 @@ public class ValidationService {
         return new DataNotFoundException(FOREIGN_KEY_NOT_FOUND.getMessage() + fieldName + " = " + value, FOREIGN_KEY_NOT_FOUND.getErrorCode());
     }
 
+    // New lunch-specific validation methods
     public static void validateLunchDateAndTime(LocalDate date, LocalTime time) {
         LocalDate today = LocalDate.now();
+
+        // Check if date is in the past
         if (date.isBefore(today)) {
-            throw new ForbiddenException(
-                    LUNCH_IN_PAST.getMessage(),
-                    LUNCH_IN_PAST.getErrorCode()
-            );
+            throw new ForbiddenException("Ei saa planeerida lõunat möödunud päevale", 2001);
         }
 
+        // Check if date is today but time is in the past
         if (date.equals(today) && time.isBefore(LocalTime.now())) {
-            throw new ForbiddenException(
-                    LUNCH_IN_PAST.getMessage(),
-                    LUNCH_IN_PAST.getErrorCode()
-            );
+            throw new ForbiddenException("Ei saa planeerida lõunad möödunud ajale", 2002);
         }
 
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-            throw new ForbiddenException(
-                    LUNCH_ON_WEEKEND.getMessage(),
-                    LUNCH_ON_WEEKEND.getErrorCode()
-            );
-        }
-    }
-
-    public static void validateUserIsLunchCreator(Integer userId, LunchEvent lunchEvent) {
-        if (!lunchEvent.getUser().getId().equals(userId)) {
-            throw new ForbiddenException(
-                    NOT_YOUR_LUNCH.getMessage(),
-                    NOT_YOUR_LUNCH.getErrorCode()
-            );
-        }
-    }
-
-    public static void validateLunchNotCanceled(LunchEvent lunchEvent) {
-        if ("C".equals(lunchEvent.getStatus())) {
-            throw new ForbiddenException(
-                    LUNCH_EVENT_CANCELED.getMessage(),
-                    LUNCH_EVENT_CANCELED.getErrorCode()
-            );
-        }
-    }
-
-    public static void validateAtLeastOneLunchExists(List<LunchEvent> lunchEvents) {
-        if (lunchEvents == null || lunchEvents.isEmpty()) {
-            throw new DataNotFoundException(
-                    NO_LUNCH_FOUND.getMessage(),
-                    NO_LUNCH_FOUND.getErrorCode()
-            );
-        }
-    }
-
-    public static void validateAvailableSpots(LunchEvent lunchEvent) {
-        if (lunchEvent.getPaxAvailable() <= 0) {
-            throw new ForbiddenException(
-                    LUNCH_NO_SPOTS.getMessage(),
-                    LUNCH_NO_SPOTS.getErrorCode()
-            );
+        // Check if date is a workday (Monday to Friday)
+        if (!isWorkday(date)) {
+            throw new ForbiddenException("Lõunat saab planeerida ainult tööpäevale", 2003);
         }
     }
 
     public static boolean isWorkday(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+        DayOfWeek day = date.getDayOfWeek();
+        return day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY;
     }
 
-}
+    public static void validateLunchOwnership(Integer userId, LunchEvent lunchEvent) {
+        if (!lunchEvent.getUser().getId().equals(userId)) {
+            throw new ForbiddenException("Sa saad muuda ainult enda loodud lõunaid", 2004);
+        }
+    }
 
+    public static void validateLunchNotCanceled(LunchEvent lunchEvent) {
+        if (Status.CANCELLED.getCode().equals(lunchEvent.getStatus())) {
+            throw new ForbiddenException("Sa ei saa muuta lõunat, mis on tühistatud", 2005);
+        }
+    }
+
+    public static void validateAvailableSpots(LunchEvent lunchEvent) {
+        if (lunchEvent.getPaxAvailable() <= 0 || Status.FULL.getCode().equals(lunchEvent.getStatus())) {
+            throw new ForbiddenException("Sellele lõunale ei ole vabu kohti", 2006);
+        }
+    }
+
+    public static void validateSufficientSeats(int newPaxTotal, int currentJoinCount) {
+        if (newPaxTotal < currentJoinCount) {
+            throw new ForbiddenException("Sa ei saa vähendada lõunatajate koguarvu väiksemaks kui on liitujaid", 2010);
+        }
+    }
+}
