@@ -65,6 +65,7 @@ CREATE TABLE register (
                           id serial  NOT NULL,
                           lunch_event_id int  NOT NULL,
                           user_id int  NOT NULL,
+                          status varchar(1)  NOT NULL,
                           CONSTRAINT register_pk PRIMARY KEY (id)
 );
 

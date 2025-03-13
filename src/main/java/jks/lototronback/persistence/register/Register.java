@@ -2,6 +2,7 @@ package jks.lototronback.persistence.register;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jks.lototronback.persistence.lunchevent.LunchEvent;
 import jks.lototronback.persistence.user.User;
 import lombok.Getter;
@@ -28,8 +29,9 @@ public class Register {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Size(max = 1)
     @NotNull
-    @Column(name = "status", nullable = false)
-    private Integer status;
+    @Column(name = "status", nullable = false, length = 1)
+    private String status;
 
 }

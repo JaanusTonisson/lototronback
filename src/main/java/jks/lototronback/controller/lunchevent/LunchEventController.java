@@ -77,7 +77,6 @@ public class LunchEventController {
     @PostMapping("/lunch-event/join")
     @Operation(summary = "Liitumine lunch-eventiga",
     description = "Süsteemis lisatakse parameetrite user id ja event id alusel lõunale liituja andmebaasi register tabelisse. ")
-
     public ResponseEntity<String> joinLunchEvent(@RequestBody JoinLunchDto joinLunchDto) {
         try {
             lunchEventService.joinLunch(joinLunchDto);
@@ -89,4 +88,12 @@ public class LunchEventController {
         }
     }
 
+    @GetMapping("/reveal-matches_by-user-events")
+    @Operation(summary = "Ühe lõunataja (loodud ja liitutud) eventidel osalevate teiste lõunatajate nime jm info teadasaamine",
+    description = "Süsteemist otsitakse User Id järgi lunch event tabelist evendi info, sellega seoses Register tabelist " +
+            "sama lõunaga liitunud teised Id-d ning kolmandaks user tabeli kaudu user profile tabelist" +
+            " liitunu(te) info (eesnimi, perekonnanimi, telefon)")
+    public static void revealMatchesByUserEvent(@RequestParam Integer userId, @RequestParam Integer eventId) {
+
+    }
 }

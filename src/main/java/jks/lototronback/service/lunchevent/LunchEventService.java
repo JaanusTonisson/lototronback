@@ -47,6 +47,13 @@ public class LunchEventService {
         lunchEvent.setRestaurant(restaurant);
 
         lunchEventRepository.save(lunchEvent);
+
+        Register register = new Register();
+        register.setUser(user);
+        register.setLunchEvent(lunchEvent);
+        register.setStatus(Status.ACTIVE.getCode());
+        registerRepository.save(register);
+
     }
 
     public List<AvailableEventDto> getAllAvailableLunchEvents() {
@@ -101,8 +108,6 @@ public class LunchEventService {
         lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
         Register register = new Register();
         register.setUser(user);
-        register.setLunchEvent(lunchEvent);
-        register.setStatus(7); // Andmebaasi register tabelis ebavajalik tulp - kustutada see rida koos andmebaasi tulba kustutamisega
         registerRepository.save(register);
     }
 
