@@ -3,15 +3,10 @@ package jks.lototronback.controller.lunchevent;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
 import jks.lototronback.controller.lunchevent.dto.CreateLunchEventRequest;
-import jks.lototronback.controller.lunchevent.dto.JoinLunchDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
-import jks.lototronback.persistence.register.RegisterRepository;
 import jks.lototronback.service.lunchevent.LunchEventService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

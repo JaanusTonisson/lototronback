@@ -9,7 +9,8 @@ public enum Error {
     INCORRECT_CREDENTIALS("Vale kasutajanimi või parool", 111),
     PRIMARY_KEY_NOT_FOUND("Ei leidnud primary keyd: ", 888),
     FOREIGN_KEY_NOT_FOUND("Ei leidnud foreign keyd: ", 999),
-
+    USER_NOT_FOUND("Kasutajat ei leitud ", 404),
+    INCORRECT_PASSWORD("Vale parool", 112),
     LUNCH_IN_PAST("Ei saa planeerida lõunad möödunud kuupäevale", 2001),
     LUNCH_ON_WEEKEND("Lõunat saab planeerida ainult tööpäevale", 2002),
     LUNCH_NO_SPOTS("Sellele lõunale ei ole vabat kohta", 2003),

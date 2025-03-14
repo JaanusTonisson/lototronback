@@ -279,7 +279,6 @@ public class LunchEventService {
 
         List<LunchEventDto> dtos = lunchEventMapper.toLunchEventDtos(lunchEvents);
 
-        // Set flags
         for (LunchEventDto dto : dtos) {
             dto.setIsCreator(false);
             dto.setIsJoined(true);

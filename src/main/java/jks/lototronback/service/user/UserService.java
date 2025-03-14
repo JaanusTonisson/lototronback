@@ -1,6 +1,9 @@
 package jks.lototronback.service.user;
 
 import jks.lototronback.controller.user.dto.NewUser;
+import jks.lototronback.controller.user.dto.PasswordChange;
+import jks.lototronback.infrastructure.Error;
+import jks.lototronback.infrastructure.exception.ForbiddenException;
 import jks.lototronback.persistence.profile.Profile;
 import jks.lototronback.persistence.profile.ProfileMapper;
 import jks.lototronback.persistence.profile.ProfileRepository;
@@ -15,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import static jks.lototronback.status.Status.DEACTIVATED;
 
 
 @Service
@@ -57,7 +62,6 @@ public class UserService {
         return user;
     }
 
-
     private void createAndSaveProfile(NewUser newUser, User user) {
         Profile profile = createProfile(newUser, user);
         profileRepository.save(profile);
@@ -69,7 +73,18 @@ public class UserService {
         return profile;
     }
 
+    public void changePassword(PasswordChange passwordChange) {
+        User user = userRepository.findUserBy(passwordChange.getUserId(), passwordChange.getOldPassword())
+                .orElseThrow(() -> new ForbiddenException(Error.INCORRECT_PASSWORD.getMessage(), Error.INCORRECT_PASSWORD.getErrorCode()));
+        user.setPassword(passwordChange.getNewPassword());
+        userRepository.save(user);
+    }
 
+    public void removeUser(Integer userId) {
+        User user = getValidatedUser(userId);
+        user.setStatus(DEACTIVATED.getCode());
+        userRepository.save(user);
+    }
 }
 
 
