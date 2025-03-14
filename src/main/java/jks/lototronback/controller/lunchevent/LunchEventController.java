@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jks.lototronback.controller.lunchevent.dto.CreateLunchEventRequest;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
+import jks.lototronback.persistence.register.RegisterRepository;
 import jks.lototronback.service.lunchevent.LunchEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ import java.util.List;
 public class LunchEventController {
 
     private final LunchEventService lunchEventService;
+    private final RegisterRepository registerRepository;
+
 
     @PostMapping("/lunch/event")
     @Operation(summary = "Loob uue lõuna")
@@ -108,4 +111,14 @@ public class LunchEventController {
             @RequestParam LocalDate date) {
         return lunchEventService.getUserLunchesByDate(userId, date);
     }
+
+    //Rainiga 13.03:
+//    @GetMapping("/reveal-matches_by-user-events")
+//    @Operation(summary = "Ühe lõunataja (loodud ja liitutud) eventidel osalevate teiste lõunatajate nime jm info teadasaamine",
+//            description = "Süsteemist otsitakse User Id järgi lunch event tabelist evendi info, sellega seoses Register tabelist " +
+//                    "sama lõunaga liitunud teised Id-d ning kolmandaks user tabeli kaudu user profile tabelist" +
+//                    " liitunu(te) info (eesnimi, perekonnanimi, telefon)")
+//    public static void revealMatchesByUserEvent(@RequestParam Integer userId, @RequestParam Integer eventId) {
+//
+//    }
 }

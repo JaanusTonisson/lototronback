@@ -27,11 +27,21 @@ public interface RegisterRepository extends JpaRepository<Register, Integer> {
     default List<Register> findUpcomingJoinedLunchesByUserId(Integer userId, LocalDate today, LocalTime now) {
         return findUpcomingJoinedLunchesByUserId(userId, today, now, Status.CANCELLED.getCode());
     }
+//    Rainilt 4 rida: 13.03:
+    @Query("""
+            select r from Register r
+            where r.lunchEvent.user.id = :userId and r.lunchEvent.date >= :date and r.status = :status
+            order by r.lunchEvent.date, r.lunchEvent.time""")
+    List<Register> findRegistersFromDate(Integer userId, LocalDate date, String status);
 
     @Query("SELECT r FROM Register r JOIN r.lunchEvent l WHERE r.user.id = :userId " +
             "AND ((l.date < :today) OR (l.date = :today AND l.time < :now)) " +
             "AND r.status != :cancelledStatus ORDER BY l.date DESC, l.time DESC")
     List<Register> findPastJoinedLunchesByUserId(Integer userId, LocalDate today, LocalTime now, String cancelledStatus);
+
+  //Rainilt 2 rida:
+    @Query("select count(r) from Register r where r.lunchEvent.id = :lunchEventId and r.status = :status")
+    long countRegisteredParticipants(Integer lunchEventId, String status);
 
     default List<Register> findPastJoinedLunchesByUserId(Integer userId, LocalDate today, LocalTime now) {
         return findPastJoinedLunchesByUserId(userId, today, now, Status.CANCELLED.getCode());

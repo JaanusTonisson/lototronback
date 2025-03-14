@@ -29,9 +29,12 @@ public class LunchEventService {
 
     private final LunchEventRepository lunchEventRepository;
     private final RestaurantRepository restaurantRepository;
-    private final RegisterRepository registerRepository;
     private final UserRepository userRepository;
     private final LunchEventMapper lunchEventMapper;
+    private final UserService userService;
+    private final RestaurantService restaurantService;
+    private final RegisterRepository registerRepository;
+
 
     @Transactional
     public LunchEventDto createLunchEvent(Integer userId, CreateLunchEventRequest request) {
@@ -221,6 +224,8 @@ public class LunchEventService {
         }
 
         lunchEventRepository.save(lunchEvent);
+
+
     }
 
     public List<LunchEventDto> getAvailableLunchesByDate(Integer userId, LocalDate date) {
