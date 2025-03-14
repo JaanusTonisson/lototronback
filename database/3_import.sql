@@ -53,3 +53,10 @@ INSERT INTO lototron.lunch_event (id, user_id, restaurant_id, pax_total, pax_ava
 INSERT INTO lototron.lunch_event (id, user_id, restaurant_id, pax_total, pax_available, date, time, status, is_available) VALUES (default, 2, 3, 5, 4, '2025-03-26', '14:00:00', 'A', true);
 INSERT INTO lototron.lunch_event (id, user_id, restaurant_id, pax_total, pax_available, date, time, status, is_available) VALUES (default, 3, 4, 6, 5, '2025-03-24', '14:00:00', 'A', true);
 
+
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 1, 2, 'A');
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 2, 3, 'A');
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 3, 1, 'A');
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 13, 2, 'A');
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 14, 3, 'A');
+INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 15, 1, 'A');
