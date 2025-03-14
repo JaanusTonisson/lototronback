@@ -2,8 +2,6 @@ package jks.lototronback.controller.restaurant;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jks.lototronback.controller.restaurant.dto.RestaurantDto;
-import jks.lototronback.controller.restaurant.dto.RestaurantInfo;
-import jks.lototronback.persistence.restaurant.Restaurant;
 import jks.lototronback.service.restaurant.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
