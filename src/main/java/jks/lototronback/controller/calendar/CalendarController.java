@@ -21,7 +21,7 @@ public class CalendarController {
     }
 
     @GetMapping("/calendar")
-    @Operation(summary = "Get workday calendar for specified month")
+    @Operation(summary = "Tööpäeva kalender aasta ja kuu kohta")
     public WorkdayCalendarDto getWorkdayCalendarForMonth(
             @RequestParam Integer year,
             @RequestParam Integer month) {

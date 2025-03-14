@@ -13,6 +13,7 @@ import jks.lototronback.persistence.restaurant.Restaurant;
 import jks.lototronback.persistence.restaurant.RestaurantRepository;
 import jks.lototronback.persistence.user.User;
 import jks.lototronback.persistence.user.UserRepository;
+import jks.lototronback.service.user.UserService;
 import jks.lototronback.status.Status;
 import jks.lototronback.validation.ValidationService;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +33,12 @@ public class LunchEventService {
     private final RegisterRepository registerRepository;
     private final UserRepository userRepository;
     private final LunchEventMapper lunchEventMapper;
+    private final UserService userService;
 
     @Transactional
     public LunchEventDto createLunchEvent(Integer userId, CreateLunchEventRequest request) {
         // Validate user
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
+        User user = userService.getValidatedUser(userId);
 
         // Validate restaurant
         Restaurant restaurant = restaurantRepository.findById(request.getRestaurantId())
@@ -329,7 +330,6 @@ public class LunchEventService {
         }
     }
 
-    // Helper method to check if two times are within a specified interval in minutes
     private boolean isTimeWithinInterval(LocalTime time1, LocalTime time2, int minutes) {
         long diffInMinutes = Math.abs(
                 time1.toSecondOfDay() / 60 - time2.toSecondOfDay() / 60
