@@ -3,11 +3,9 @@ package jks.lototronback.persistence.lunchevent;
 import jks.lototronback.controller.lunchevent.dto.AvailableEventDto;
 import jks.lototronback.controller.lunchevent.dto.LunchEventDto;
 import jks.lototronback.status.Status;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
@@ -29,25 +27,21 @@ public interface LunchEventMapper {
     LunchEventDto toLunchEventDto(LunchEvent lunchEvent);
 
     List<LunchEventDto> toLunchEventDtos(List<LunchEvent> lunchEvents);
-}
 
-//Rainiga 13.03:
+//    //Rainiga 13.03:
+//
+//    @Mapping(source = "id", target = "eventId")
+//    @Mapping(source = "user.id", target = "userId")
+//    @Mapping(source = "restaurant.id", target = "restaurantId")
+//    @Mapping(source = "paxTotal", target = "paxTotal")
+//    @Mapping(source = "paxAvailable", target = "paxAvailable")
+//    @Mapping(source = "date", target = "date")
+//    @Mapping(source = "time", target = "time", qualifiedByName = "toHoursMinutes")
+//    @Mapping(source = "restaurant.address", target = "restaurantAddress")
+//    AvailableEventDto toAvailableLunchEventDto(LunchEvent lunchEvent);
+//
+//    List<AvailableEventDto> toAvailableLunchEventDtos(List<LunchEvent> lunchEvents);
 
-    @Mapping(source = "id", target = "eventId")
-    @Mapping(source = "user.id", target = "userId")
-    @Mapping(source = "restaurant.id", target = "restaurantId")
-    @Mapping(source = "paxTotal", target = "paxTotal")
-    @Mapping(source = "paxAvailable", target = "paxAvailable")
-    @Mapping(source = "date", target = "date")
-    @Mapping(source = "time", target = "time", qualifiedByName = "toHoursMinutes")
-    @Mapping(source = "restaurant.address", target = "restaurantAddress")
-    AvailableEventDto toAvailableLunchEventDto(LunchEvent lunchEvent);
-
-    List<AvailableEventDto> toAvailableLunchEventDtos(List<LunchEvent> lunchEvents);
-
-    @Named("toHoursMinutes")
-    static String toHoursMinutes(LocalTime time) {
-        return time.toString(); //võtab automaatselt sekundid maha, aga töötab vaid siis, kui sekundeid on :00 (Frondist saabki vaid HH:MM)
-    }
 
 }
+
