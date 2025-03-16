@@ -13,6 +13,7 @@ import jks.lototronback.persistence.restaurant.Restaurant;
 import jks.lototronback.persistence.restaurant.RestaurantRepository;
 import jks.lototronback.persistence.user.User;
 import jks.lototronback.persistence.user.UserRepository;
+import jks.lototronback.service.message.MessageService;
 import jks.lototronback.service.user.UserService;
 import jks.lototronback.status.Status;
 import jks.lototronback.validation.ValidationService;
@@ -34,6 +35,7 @@ public class LunchEventService {
     private final UserRepository userRepository;
     private final LunchEventMapper lunchEventMapper;
     private final UserService userService;
+    private final MessageService messageService;
 
     @Transactional
     public LunchEventDto createLunchEvent(Integer userId, CreateLunchEventRequest request) {
@@ -135,11 +137,29 @@ public class LunchEventService {
         // Verify ownership
         ValidationService.validateLunchOwnership(userId, lunchEvent);
 
+        // Save creator reference before updating status
+        User creator = lunchEvent.getUser();
+
         // Update status
         lunchEvent.setStatus(Status.CANCELLED.getCode());
         lunchEvent.setIsAvailable(false);
 
         lunchEventRepository.save(lunchEvent);
+
+        // NEW CODE: Notify all joiners
+        List<Register> registers = registerRepository.findByLunchEventId(lunchEventId);
+
+        for (Register register : registers) {
+            if (!register.getStatus().equals(Status.CANCELLED.getCode())) {
+                messageService.createContactInfoMessage(
+                        register.getUser(),      // joiner (receiver)
+                        creator,                 // creator (sender)
+                        lunchEvent,
+                        "Lõuna on tühistatud",
+                        "tühistas lõuna"
+                );
+            }
+        }
     }
 
     @Transactional
@@ -160,12 +180,12 @@ public class LunchEventService {
 
         // Check if user is already joined
         if (registerRepository.existsByUserIdAndLunchEventId(userId, lunchEventId)) {
-            throw new ForbiddenException("You have already joined this lunch event", 2007);
+            throw new ForbiddenException("Sa oled juba liitunud selle lõunaga", 2007);
         }
 
         // Check if user is the creator
         if (lunchEvent.getUser().getId().equals(userId)) {
-            throw new ForbiddenException("You are the creator of this lunch event", 2008);
+            throw new ForbiddenException("Sa oled selle lõuna looja", 2008);
         }
 
         // Create registration
@@ -187,6 +207,24 @@ public class LunchEventService {
 
         lunchEventRepository.save(lunchEvent);
 
+        // Send message to creator about the new joiner
+        messageService.createContactInfoMessage(
+                lunchEvent.getUser(),         // event creator (receiver)
+                user,                         // joiner (sender)
+                lunchEvent,
+                "Keegi liitus sinu lõunaga.",
+                "on liitunud sinu lõunaga"
+        );
+
+        // Send message to joiner with creator's info
+        messageService.createContactInfoMessage(
+                user,                         // joiner (receiver)
+                lunchEvent.getUser(),         // event creator (sender)
+                lunchEvent,
+                "Sa liitusid lõunaga",
+                "on lõuna looja"
+        );
+
         // Convert to DTO and set additional flags
         LunchEventDto dto = lunchEventMapper.toLunchEventDto(lunchEvent);
         dto.setIsCreator(false);
@@ -206,7 +244,10 @@ public class LunchEventService {
 
         // Find registration
         Register register = registerRepository.findByUserIdAndLunchEventId(userId, lunchEventId)
-                .orElseThrow(() -> new DataNotFoundException("You have not joined this lunch event", 2009));
+                .orElseThrow(() -> new DataNotFoundException("Sa ei ole liitunud selle lõunaga", 2009));
+
+        // Get user info before changing status (for notification)
+        User user = register.getUser();
 
         // Update registration status
         register.setStatus(Status.CANCELLED.getCode());
@@ -222,6 +263,14 @@ public class LunchEventService {
         }
 
         lunchEventRepository.save(lunchEvent);
+
+        messageService.createContactInfoMessage(
+                lunchEvent.getUser(),        // event creator (receiver)
+                user,                        // the person who left (sender)
+                lunchEvent,
+                "Keegi lahkus su lõunalt",
+                "lahkus su lõunalt"
+        );
     }
 
     public List<LunchEventDto> getAvailableLunchesByDate(Integer userId, LocalDate date) {

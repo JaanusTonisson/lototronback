@@ -60,3 +60,47 @@ INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (defa
 INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 13, 2, 'A');
 INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 14, 3, 'A');
 INSERT INTO lototron.register (id, lunch_event_id, user_id, status) VALUES (default, 15, 1, 'A');
+
+-- Sõnumid lõunasündmuste loomise kohta
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 2, 1, 'Uus lõunasündmus loodud', 'Kätlin Kärilaid lõi uue lõunasündmuse restoranis Guru Restoran kuupäeval 2025-03-21 kell 16:00:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 3, 2, 'Uus lõunasündmus loodud', 'Jaanus Jarilaid lõi uue lõunasündmuse restoranis Beer Garden kuupäeval 2025-03-20 kell 16:00:00. Kontaktandmed: Jaanus Jarilaid, Telefon: 51515125', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 1, 3, 'Uus lõunasündmus loodud', 'Stella Sterilaid lõi uue lõunasündmuse restoranis Tallinn Pizza & Kebab kuupäeval 2025-03-19 kell 16:00:00. Kontaktandmed: Stella Sterilaid, Telefon: 51234123', 'S', 'R');
+
+-- Teavitussõnumid sündmuse loojale, kui keegi liitub
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 1, 2, 'Keegi liitus sinu lõunasündmusega', 'Jaanus Jarilaid liitus sinu lõunasündmusega restoranis Guru Restoran kuupäeval 2025-03-21 kell 16:00:00. Kontaktandmed: Jaanus Jarilaid, Telefon: 51515125', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 2, 3, 'Keegi liitus sinu lõunasündmusega', 'Stella Sterilaid liitus sinu lõunasündmusega restoranis Beer Garden kuupäeval 2025-03-20 kell 16:00:00. Kontaktandmed: Stella Sterilaid, Telefon: 51234123', 'S', 'R');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 3, 1, 'Keegi liitus sinu lõunasündmusega', 'Kätlin Kärilaid liitus sinu lõunasündmusega restoranis Tallinn Pizza & Kebab kuupäeval 2025-03-19 kell 16:00:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'N');
+
+-- Sõnumid liitujatele sündmuse looja kontaktandmetega
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 2, 1, 'Liitusid lõunasündmusega', 'Kätlin Kärilaid on lõunasündmuse looja restoranis Guru Restoran kuupäeval 2025-03-21 kell 16:00:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'R');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 3, 2, 'Liitusid lõunasündmusega', 'Jaanus Jarilaid on lõunasündmuse looja restoranis Beer Garden kuupäeval 2025-03-20 kell 16:00:00. Kontaktandmed: Jaanus Jarilaid, Telefon: 51515125', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 1, 3, 'Liitusid lõunasündmusega', 'Stella Sterilaid on lõunasündmuse looja restoranis Tallinn Pizza & Kebab kuupäeval 2025-03-19 kell 16:00:00. Kontaktandmed: Stella Sterilaid, Telefon: 51234123', 'S', 'R');
+
+-- Sõnumid lõunasündmuse tühistamise kohta
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 2, 1, 'Lõunasündmus tühistatud', 'Kätlin Kärilaid tühistas lõunasündmuse restoranis Hesburger Viru kuupäeval 2025-03-13 kell 14:00:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 3, 1, 'Lõunasündmus tühistatud', 'Kätlin Kärilaid tühistas lõunasündmuse restoranis Hesburger Viru kuupäeval 2025-03-13 kell 14:00:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'R');
+
+-- Sõnumid lõunasündmusest lahkumise kohta
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 3, 1, 'Keegi lahkus sinu lõunasündmusest', 'Kätlin Kärilaid lahkus sinu lõunasündmusest restoranis Tallinn Pizza & Kebab kuupäeval 2025-03-26 kell 12:30:00. Kontaktandmed: Kätlin Kärilaid, Telefon: 51515151', 'S', 'N');
+
+INSERT INTO lototron.message (id, receiver_user_id, sender_user_id, subject, body, sender_type, state)
+VALUES (default, 1, 2, 'Keegi lahkus sinu lõunasündmusest', 'Jaanus Jarilaid lahkus sinu lõunasündmusest restoranis Guru Restoran kuupäeval 2025-03-14 kell 14:00:00. Kontaktandmed: Jaanus Jarilaid, Telefon: 51515125', 'S', 'R');
