@@ -29,4 +29,10 @@ public class ProfileController {
     public void updateUser(@RequestParam Integer userId, @RequestBody ProfileInfo profileInfo) {
         profileService.updateProfile(userId, profileInfo);
     }
+    @DeleteMapping("/profile/image")
+    @Operation(summary = "Delete user profile image")
+    public void deleteProfileImage(@RequestParam Integer userId) {
+        profileService.deleteProfileImage(userId);
+    }
+
 }
