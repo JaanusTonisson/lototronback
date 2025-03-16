@@ -15,6 +15,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping("/profile")
+    @Operation(summary = "Toob kasutaja profiiliandmed kasutaja ID põhjal" )
     public ProfileInfo getUserProfile(@RequestParam Integer userId) {
         ProfileInfo userProfile = profileService.getUserProfile(userId);
         return userProfile;
