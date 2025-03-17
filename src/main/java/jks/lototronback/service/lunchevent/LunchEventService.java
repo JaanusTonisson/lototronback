@@ -366,7 +366,7 @@ public class LunchEventService {
         for (LunchEvent lunch : createdLunches) {
             LocalTime lunchTime = lunch.getTime();
             if (isTimeWithinInterval(time, lunchTime, 60)) {
-                throw new ForbiddenException("You already have a lunch scheduled within 60 minutes of this time", 2010);
+                throw new ForbiddenException("Sul juba on selles ajavahemikus lõuna tulemas", 2010);
             }
         }
 
@@ -374,7 +374,7 @@ public class LunchEventService {
         for (Register register : joinedRegisters) {
             LocalTime lunchTime = register.getLunchEvent().getTime();
             if (isTimeWithinInterval(time, lunchTime, 60)) {
-                throw new ForbiddenException("You already have a lunch scheduled within 60 minutes of this time", 2010);
+                throw new ForbiddenException("Sul juba on selles ajavahemikus lõuna tulemas", 2010);
             }
         }
     }
