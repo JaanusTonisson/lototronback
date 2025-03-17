@@ -102,7 +102,7 @@ public class LunchEventController {
     }
 
     @GetMapping("/lunch/events/user-date")
-    @Operation(summary = "Get all lunches for a user on a specific date")
+    @Operation(summary = "Toob kasutaja lõunad valitud kuupäeval")
     public List<LunchEventDto> getUserLunchesByDate(
             @RequestParam Integer userId,
             @RequestParam LocalDate date) {

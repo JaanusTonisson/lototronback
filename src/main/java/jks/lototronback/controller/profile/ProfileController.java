@@ -30,7 +30,7 @@ public class ProfileController {
         profileService.updateProfile(userId, profileInfo);
     }
     @DeleteMapping("/profile/image")
-    @Operation(summary = "Delete user profile image")
+    @Operation(summary = "Kustuta profiili pilt")
     public void deleteProfileImage(@RequestParam Integer userId) {
         profileService.deleteProfileImage(userId);
     }
