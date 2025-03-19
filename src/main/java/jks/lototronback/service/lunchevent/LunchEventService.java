@@ -146,7 +146,7 @@ public class LunchEventService {
 
         lunchEventRepository.save(lunchEvent);
 
-        // NEW CODE: Notify all joiners
+        //  Notify all joiners
         List<Register> registers = registerRepository.findByLunchEventId(lunchEventId);
 
         for (Register register : registers) {
