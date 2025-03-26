@@ -28,8 +28,8 @@ public class LunchEventController {
     })
     public LunchEventDto createLunchEvent(
             @RequestParam Integer userId,
-            @RequestBody CreateLunchEventRequest request) {
-        return lunchEventService.createLunchEvent(userId, request);
+            @RequestBody CreateLunchEventRequest createLunchEventRequest) {
+        return lunchEventService.createLunchEvent(userId, createLunchEventRequest);
     }
 
     @PutMapping("/lunch/event/{lunchEventId}")

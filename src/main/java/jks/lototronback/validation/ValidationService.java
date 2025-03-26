@@ -14,7 +14,6 @@ import static jks.lototronback.infrastructure.Error.*;
 
 public class ValidationService {
 
-    // Existing methods
     public static DataNotFoundException throwPrimaryKeyNotFoundException(String primaryKeyName, Integer value) {
         return new DataNotFoundException(PRIMARY_KEY_NOT_FOUND.getMessage() + primaryKeyName + " = " + value, PRIMARY_KEY_NOT_FOUND.getErrorCode());
     }
@@ -23,21 +22,17 @@ public class ValidationService {
         return new DataNotFoundException(FOREIGN_KEY_NOT_FOUND.getMessage() + fieldName + " = " + value, FOREIGN_KEY_NOT_FOUND.getErrorCode());
     }
 
-    // New lunch-specific validation methods
     public static void validateLunchDateAndTime(LocalDate date, LocalTime time) {
         LocalDate today = LocalDate.now();
 
-        // Check if date is in the past
         if (date.isBefore(today)) {
             throw new ForbiddenException("Ei saa planeerida lõunat möödunud päevale", 2001);
         }
 
-        // Check if date is today but time is in the past
         if (date.equals(today) && time.isBefore(LocalTime.now())) {
             throw new ForbiddenException("Ei saa planeerida lõunad möödunud ajale", 2002);
         }
 
-        // Check if date is a workday (Monday to Friday)
         if (!isWorkday(date)) {
             throw new ForbiddenException("Lõunat saab planeerida ainult tööpäevale", 2003);
         }
@@ -66,8 +61,8 @@ public class ValidationService {
         }
     }
 
-    public static void validateSufficientSeats(int newPaxTotal, int currentJoinCount) {
-        if (newPaxTotal < currentJoinCount) {
+    public static void validateSufficientSeats(int newPaxTotal, int currentPaxCount) {
+        if (newPaxTotal < currentPaxCount) {
             throw new ForbiddenException("Sa ei saa vähendada lõunatajate koguarvu väiksemaks kui on liitujaid", 2010);
         }
     }

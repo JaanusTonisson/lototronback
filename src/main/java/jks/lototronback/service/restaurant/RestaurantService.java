@@ -1,6 +1,7 @@
 package jks.lototronback.service.restaurant;
 
 import jks.lototronback.controller.restaurant.dto.RestaurantDto;
+import jks.lototronback.persistence.restaurant.Restaurant;
 import jks.lototronback.persistence.restaurant.RestaurantMapper;
 import jks.lototronback.persistence.restaurant.RestaurantRepository;
 import jks.lototronback.validation.ValidationService;
@@ -27,5 +28,10 @@ public class RestaurantService {
                 restaurantRepository.findById(restaurantId)
                         .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("restaurantId", restaurantId))
         );
+    }
+
+    public Restaurant getValidatedRestaurant(Integer restaurantId) {
+        return restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("restaurantId", restaurantId));
     }
 }
