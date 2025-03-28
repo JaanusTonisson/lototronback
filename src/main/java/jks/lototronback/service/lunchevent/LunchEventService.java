@@ -94,19 +94,6 @@ public class LunchEventService {
     }
 
     @Transactional
-    public void cancelJoinedLunch(Integer userId, Integer lunchEventId) {
-        LunchEvent lunchEvent = getValidatedLunchEvent(lunchEventId);
-        ValidationService.validateLunchNotCanceled(lunchEvent);
-        Register register = getActiveRegisterForLunch(userId, lunchEventId);
-        User leaver = register.getUser();
-        markRegisterAsCancelled(register);
-        increaseAvailableSpots(lunchEvent);
-        updateLunchStatusAfterCancellation(lunchEvent);
-        saveLunchEvent(lunchEvent);
-        notifyCreatorAboutLeaving(leaver, lunchEvent);
-    }
-
-    @Transactional
     public LunchEventDto joinLunchEvent(Integer userId, Integer lunchEventId) {
         User user = getValidatedUser(userId);
         LunchEvent lunchEvent = getValidatedLunchEvent(lunchEventId);
@@ -114,7 +101,7 @@ public class LunchEventService {
         Register register = createNewRegister(user, lunchEvent);
         saveRegister(register);
         decreaseAvailableSpots(lunchEvent);
-        updateLunchAvailabilityStatus(lunchEvent);
+        updateLunchEventAvailability(lunchEvent);
         saveLunchEvent(lunchEvent);
         sendJoiningNotifications(user, lunchEvent);
         return createLunchEventDto(lunchEvent, false, true);
@@ -124,13 +111,143 @@ public class LunchEventService {
     public void cancelLunchEvent(Integer userId, Integer lunchEventId) {
         LunchEvent lunchEvent = getValidatedLunchEvent(lunchEventId);
         validateLunchOwnership(userId, lunchEvent);
-        updateLunchEventStatusAsCancelled(lunchEvent);
+        updateCreatedLunchEventStatusAfterCancellation(lunchEvent);
         notifyCancellationToJoiners(lunchEventId, lunchEvent);
     }
 
-    private void validateLunchParameters(Integer userId, CreateLunchEventRequest createLunchEventRequest) {
+    @Transactional
+    public void cancelJoinedLunch(Integer userId, Integer lunchEventId) {
+        LunchEvent lunchEvent = getValidatedLunchEvent(lunchEventId);
+        ValidationService.validateLunchNotCanceled(lunchEvent);
+        Register register = getActiveRegisterForLunch(userId, lunchEventId);
+        User leaver = register.getUser();
+        markRegisterAsCancelled(register);
+        increaseAvailableSpots(lunchEvent);
+        updateJoinedLunchStatusAfterCancellation(lunchEvent);
+        saveLunchEvent(lunchEvent);
+        notifyCreatorAboutLeaving(leaver, lunchEvent);
+    }
+
+    private static int calculateCurrentPaxCount(LunchEvent lunchEvent) {
+        return lunchEvent.getPaxTotal() - lunchEvent.getPaxAvailable();
+    }
+
+    private void increaseAvailableSpots(LunchEvent lunchEvent) {
+        lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() + 1);
+    }
+
+    private void decreaseAvailableSpots(LunchEvent lunchEvent) {
+        lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
+    }
+
+    private void notifyCreatorAboutJoining(User joiner, LunchEvent lunchEvent) {
+        User creator = lunchEvent.getUser();
+        messageService.createContactInfoMessage(
+                creator,
+                joiner,
+                lunchEvent,
+                "Keegi liitus sinu lõunaga",
+                "on liitunud sinu lõunaga"
+        );
+    }
+
+    private void notifyJoinerAboutLunch(User joiner, LunchEvent lunchEvent) {
+        User creator = lunchEvent.getUser();
+        messageService.createContactInfoMessage(
+                joiner,
+                creator,
+                lunchEvent,
+                "Sa liitusid lõunaga",
+                "on lõuna looja"
+        );
+    }
+
+    private void notifyCreatorAboutLeaving(User leaver, LunchEvent lunchEvent) {
+        User creator = lunchEvent.getUser();
+        messageService.createContactInfoMessage(
+                creator,
+                leaver,
+                lunchEvent,
+                "Keegi lahkus su lõunalt",
+                "lahkus su lõunalt"
+        );
+    }
+
+    private void notifyCancellationToJoiners(Integer lunchEventId, LunchEvent lunchEvent) {
+        List<Register> registers = registerRepository.findByLunchEventId(lunchEventId);
+        User creator = lunchEvent.getUser();
+
+        for (Register register : registers) {
+            if (!register.getStatus().equals(Status.CANCELLED.getCode())) {
+                sendCancellationMessage(lunchEvent, register.getUser(), creator);
+            }
+        }
+    }
+
+    private void sendJoiningNotifications(User joiner, LunchEvent lunchEvent) {
+        notifyCreatorAboutJoining(joiner, lunchEvent);
+        notifyJoinerAboutLunch(joiner, lunchEvent);
+    }
+
+    private void sendCancellationMessage(LunchEvent lunchEvent, User reciever, User sender) {
+        messageService.createContactInfoMessage(
+                reciever,
+                sender,
+                lunchEvent,
+                "Lõuna on tühistatud",
+                "tühistas lõuna"
+        );
+    }
+
+    private void markRegisterAsCancelled(Register register) {
+        register.setStatus(Status.CANCELLED.getCode());
+        saveRegister(register);
+    }
+
+    public List<LunchEventDto> getAvailableLunchesByDate(Integer userId, LocalDate date) {
+        List<LunchEvent> lunchEvents = lunchEventRepository.findAvailableLunchesByDate(date);
+        return createLunchEventDtos(lunchEvents, userId);
+    }
+
+    private Register getActiveRegisterForLunch(Integer userId, Integer lunchEventId) {
+        return registerRepository.findByUserIdAndLunchEventIdAndStatus(
+                        userId, lunchEventId, Status.ACTIVE.getCode())
+                .orElseThrow(() -> new DataNotFoundException("Sa ei ole liitunud selle lõunaga", 2009));
+    }
+
+    private User getValidatedUser(Integer userId) {
+        return userService.getValidatedUser(userId);
+    }
+
+    private Restaurant getValidatedRestaurant(CreateLunchEventRequest createLunchEventRequest) {
+        return restaurantService.getValidatedRestaurant(createLunchEventRequest.getRestaurantId());
+    }
+
+    private LunchEvent getValidatedLunchEvent(Integer lunchEventId) {
+        return lunchEventRepository.findById(lunchEventId)
+                .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("lunchEventId", lunchEventId));
+    }
+
+    private void validateLunchForUpdate(Integer userId, CreateLunchEventRequest createLunchEventRequest, LunchEvent lunchEvent) {
+        validateLunchOwnership(userId, lunchEvent);
+        ValidationService.validateLunchNotCanceled(lunchEvent);
         ValidationService.validateLunchDateAndTime(createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
-        validateNoTimeConflicts(userId, createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
+
+        if (!lunchEvent.getDate().equals(createLunchEventRequest.getDate()) || !lunchEvent.getTime().equals(createLunchEventRequest.getTime())) {
+            validateNoTimeConflicts(userId, createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
+        }
+    }
+
+    private static void validateLunchOwnership(Integer userId, LunchEvent lunchEvent) {
+        ValidationService.validateLunchOwnership(userId, lunchEvent);
+    }
+
+    private void validateLunchForJoining(Integer userId, Integer lunchEventId, LunchEvent lunchEvent) {
+        ValidationService.validateLunchNotCanceled(lunchEvent);
+        ValidationService.validateAvailableSpots(lunchEvent);
+        validateUserNotAlreadyJoined(userId, lunchEventId);
+
+        validateUserNotCreator(userId, lunchEvent);
     }
 
     private void validateNoTimeConflicts(Integer userId, LocalDate date, LocalTime time) {
@@ -159,107 +276,13 @@ public class LunchEventService {
         }
     }
 
-    private LunchEvent createAndSaveLunchEvent(CreateLunchEventRequest createLunchEventRequest, User user, Restaurant restaurant) {
-        LunchEvent lunchEvent = new LunchEvent();
-        lunchEvent.setUser(user);
-        lunchEvent.setRestaurant(restaurant);
-        lunchEvent.setPaxTotal(createLunchEventRequest.getPaxTotal());
-        lunchEvent.setPaxAvailable(createLunchEventRequest.getPaxTotal() - 1);
-        lunchEvent.setDate(createLunchEventRequest.getDate());
-        lunchEvent.setTime(createLunchEventRequest.getTime());
-        lunchEvent.setStatus(Status.ACTIVE.getCode());
-        lunchEvent.setIsAvailable(true);
-
-        lunchEventRepository.save(lunchEvent);
-        return lunchEvent;
-    }
-
-    private List<LunchEventDto> createLunchEventDtos(List<LunchEvent> lunchEvents, Integer userId) {
-        List<LunchEventDto> lunchEventDtos = lunchEventMapper.toLunchEventDtos(lunchEvents);
-
-        for (LunchEventDto lunchEventDto : lunchEventDtos) {
-            lunchEventDto.setIsCreator(isUserCreator(userId, lunchEventDto.getUserId()));
-            lunchEventDto.setIsJoined(isUserActivelyJoined(userId, lunchEventDto.getId()));
-        }
-
-        return lunchEventDtos;
-    }
-
-    private void updateAndSaveLunchEventDetails(CreateLunchEventRequest createLunchEventRequest, LunchEvent lunchEvent, Restaurant restaurant, int currentPaxCount) {
-        lunchEvent.setRestaurant(restaurant);
-        lunchEvent.setDate(createLunchEventRequest.getDate());
-        lunchEvent.setTime(createLunchEventRequest.getTime());
-        lunchEvent.setPaxTotal(createLunchEventRequest.getPaxTotal());
-        lunchEvent.setPaxAvailable(createLunchEventRequest.getPaxTotal() - currentPaxCount);
-        updateLunchEventAvailability(lunchEvent);
-        lunchEventRepository.save(lunchEvent);
-    }
-
-    private static void updateLunchEventAvailability(LunchEvent lunchEvent) {
-        if (lunchEvent.getPaxAvailable() <= 0) {
-            lunchEvent.setStatus(Status.FULL.getCode());
-            lunchEvent.setIsAvailable(false);
-        } else {
-            lunchEvent.setStatus(Status.ACTIVE.getCode());
-            lunchEvent.setIsAvailable(true);
-        }
+    private void validateLunchParameters(Integer userId, CreateLunchEventRequest createLunchEventRequest) {
+        ValidationService.validateLunchDateAndTime(createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
+        validateNoTimeConflicts(userId, createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
     }
 
     private static void validatePaxAvailable(CreateLunchEventRequest createLunchEventRequest, int currentPaxCount) {
         ValidationService.validateSufficientSeats(createLunchEventRequest.getPaxTotal(), currentPaxCount);
-    }
-
-    private static int calculateCurrentPaxCount(LunchEvent lunchEvent) {
-        return lunchEvent.getPaxTotal() - lunchEvent.getPaxAvailable();
-    }
-
-    private void validateLunchForUpdate(Integer userId, CreateLunchEventRequest createLunchEventRequest, LunchEvent lunchEvent) {
-        validateLunchOwnership(userId, lunchEvent);
-        ValidationService.validateLunchNotCanceled(lunchEvent);
-        ValidationService.validateLunchDateAndTime(createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
-
-        if (!lunchEvent.getDate().equals(createLunchEventRequest.getDate()) || !lunchEvent.getTime().equals(createLunchEventRequest.getTime())) {
-            validateNoTimeConflicts(userId, createLunchEventRequest.getDate(), createLunchEventRequest.getTime());
-        }
-    }
-
-    private void notifyCancellationToJoiners(Integer lunchEventId, LunchEvent lunchEvent) {
-        List<Register> registers = registerRepository.findByLunchEventId(lunchEventId);
-        User creator = lunchEvent.getUser();
-
-        for (Register register : registers) {
-            if (!register.getStatus().equals(Status.CANCELLED.getCode())) {
-                sendCancellationMessage(lunchEvent, register.getUser(), creator);
-            }
-        }
-    }
-
-    private void sendCancellationMessage(LunchEvent lunchEvent, User reciever, User sender) {
-        messageService.createContactInfoMessage(
-                reciever,
-                sender,
-                lunchEvent,
-                "Lõuna on tühistatud",
-                "tühistas lõuna"
-        );
-    }
-
-    private void updateLunchEventStatusAsCancelled(LunchEvent lunchEvent) {
-        lunchEvent.setStatus(Status.CANCELLED.getCode());
-        lunchEvent.setIsAvailable(false);
-        lunchEventRepository.save(lunchEvent);
-    }
-
-    private static void validateLunchOwnership(Integer userId, LunchEvent lunchEvent) {
-        ValidationService.validateLunchOwnership(userId, lunchEvent);
-    }
-
-    private void validateLunchForJoining(Integer userId, Integer lunchEventId, LunchEvent lunchEvent) {
-        ValidationService.validateLunchNotCanceled(lunchEvent);
-        ValidationService.validateAvailableSpots(lunchEvent);
-        validateUserNotAlreadyJoined(userId, lunchEventId);
-
-        validateUserNotCreator(userId, lunchEvent);
     }
 
     private static void validateUserNotCreator(Integer userId, LunchEvent lunchEvent) {
@@ -274,123 +297,22 @@ public class LunchEventService {
         }
     }
 
-    private boolean isUserActivelyJoined(Integer userId, Integer lunchEventId) {
-        Optional<Register> register = registerRepository.findByUserIdAndLunchEventIdAndStatus(
-                userId, lunchEventId, Status.ACTIVE.getCode());
-        return register.isPresent();
-    }
-
-    private Register getActiveRegisterForLunch(Integer userId, Integer lunchEventId) {
-        return registerRepository.findByUserIdAndLunchEventIdAndStatus(
-                        userId, lunchEventId, Status.ACTIVE.getCode())
-                .orElseThrow(() -> new DataNotFoundException("Sa ei ole liitunud selle lõunaga", 2009));
-    }
-
-    private boolean isUserCreator(Integer userId, Integer creatorId) {
-        return creatorId.equals(userId);
-    }
-
-    private Register createNewRegister(User user, LunchEvent lunchEvent) {
-        Register register = new Register();
-        register.setUser(user);
-        register.setLunchEvent(lunchEvent);
-        register.setStatus(Status.ACTIVE.getCode());
-        return register;
-    }
-
-    private void saveRegister(Register register) {
-        registerRepository.save(register);
-    }
-
-    private void decreaseAvailableSpots(LunchEvent lunchEvent) {
-        lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() - 1);
-    }
-
-    private void increaseAvailableSpots(LunchEvent lunchEvent) {
-        lunchEvent.setPaxAvailable(lunchEvent.getPaxAvailable() + 1);
-    }
-
-    private void sendJoiningNotifications(User joiner, LunchEvent lunchEvent) {
-        notifyCreatorAboutJoining(joiner, lunchEvent);
-        notifyJoinerAboutLunch(joiner, lunchEvent);
-    }
-
-    private void notifyCreatorAboutJoining(User joiner, LunchEvent lunchEvent) {
-        User creator = lunchEvent.getUser();
-        messageService.createContactInfoMessage(
-                creator,
-                joiner,
-                lunchEvent,
-                "Keegi liitus sinu lõunaga",
-                "on liitunud sinu lõunaga"
-        );
-    }
-
-    private void notifyJoinerAboutLunch(User joiner, LunchEvent lunchEvent) {
-        User creator = lunchEvent.getUser();
-        messageService.createContactInfoMessage(
-                joiner,
-                creator,
-                lunchEvent,
-                "Sa liitusid lõunaga",
-                "on lõuna looja"
-        );
-    }
-
-    private void markRegisterAsCancelled(Register register) {
-        register.setStatus(Status.CANCELLED.getCode());
-        saveRegister(register);
-    }
-
-    private void updateLunchStatusAfterCancellation(LunchEvent lunchEvent) {
-        if (Status.FULL.getCode().equals(lunchEvent.getStatus()) && lunchEvent.getPaxAvailable() > 0) {
-            lunchEvent.setStatus(Status.ACTIVE.getCode());
-            lunchEvent.setIsAvailable(true);
-        }
-    }
-
-    private void notifyCreatorAboutLeaving(User leaver, LunchEvent lunchEvent) {
-        User creator = lunchEvent.getUser();
-        messageService.createContactInfoMessage(
-                creator,
-                leaver,
-                lunchEvent,
-                "Keegi lahkus su lõunalt",
-                "lahkus su lõunalt"
-        );
-    }
-
-    public List<LunchEventDto> getAvailableLunchesByDate(Integer userId, LocalDate date) {
-        List<LunchEvent> lunchEvents = lunchEventRepository.findAvailableLunchesByDate(date);
-        return createLunchEventDtos(lunchEvents, userId);
-    }
-
-    private void updateLunchAvailabilityStatus(LunchEvent lunchEvent) {
-        updateLunchEventAvailability(lunchEvent);
-    }
-
-    private void saveLunchEvent(LunchEvent lunchEvent) {
-        lunchEventRepository.save(lunchEvent);
-    }
-
-    private User getValidatedUser(Integer userId) {
-        return userService.getValidatedUser(userId);
-    }
-
-    private Restaurant getValidatedRestaurant(CreateLunchEventRequest createLunchEventRequest) {
-        return restaurantService.getValidatedRestaurant(createLunchEventRequest.getRestaurantId());
-    }
-
-    private LunchEvent getValidatedLunchEvent(Integer lunchEventId) {
-        return lunchEventRepository.findById(lunchEventId)
-                .orElseThrow(() -> ValidationService.throwPrimaryKeyNotFoundException("lunchEventId", lunchEventId));
-    }
-
     private LunchEventDto createLunchEventDto(LunchEvent lunchEvent, boolean isCreator, boolean isJoined) {
         LunchEventDto lunchEventDto = lunchEventMapper.toLunchEventDto(lunchEvent);
         lunchEventDto.setIsCreator(isCreator);
         lunchEventDto.setIsJoined(isJoined);
         return lunchEventDto;
+    }
+
+    private List<LunchEventDto> createLunchEventDtos(List<LunchEvent> lunchEvents, Integer userId) {
+        List<LunchEventDto> lunchEventDtos = lunchEventMapper.toLunchEventDtos(lunchEvents);
+
+        for (LunchEventDto lunchEventDto : lunchEventDtos) {
+            lunchEventDto.setIsCreator(isUserCreator(userId, lunchEventDto.getUserId()));
+            lunchEventDto.setIsJoined(isUserActivelyJoined(userId, lunchEventDto.getId()));
+        }
+
+        return lunchEventDtos;
     }
 
     private List<LunchEventDto> createCreatorLunchEventDtos(List<LunchEvent> lunchEvents) {
@@ -411,17 +333,83 @@ public class LunchEventService {
         return lunchEventDtos;
     }
 
+    private LunchEvent createAndSaveLunchEvent(CreateLunchEventRequest createLunchEventRequest, User user, Restaurant restaurant) {
+        LunchEvent lunchEvent = new LunchEvent();
+        lunchEvent.setUser(user);
+        lunchEvent.setRestaurant(restaurant);
+        lunchEvent.setPaxTotal(createLunchEventRequest.getPaxTotal());
+        lunchEvent.setPaxAvailable(createLunchEventRequest.getPaxTotal() - 1);
+        lunchEvent.setDate(createLunchEventRequest.getDate());
+        lunchEvent.setTime(createLunchEventRequest.getTime());
+        lunchEvent.setStatus(Status.ACTIVE.getCode());
+        lunchEvent.setIsAvailable(true);
+
+        lunchEventRepository.save(lunchEvent);
+        return lunchEvent;
+    }
+
+    private Register createNewRegister(User user, LunchEvent lunchEvent) {
+        Register register = new Register();
+        register.setUser(user);
+        register.setLunchEvent(lunchEvent);
+        register.setStatus(Status.ACTIVE.getCode());
+        return register;
+    }
+
     private boolean isTimeWithinConflictRange(LocalTime time1, LocalTime time2) {
         long diffInMinutes = Math.abs(time1.toSecondOfDay() / 60 - time2.toSecondOfDay() / 60);
         return diffInMinutes < 60;
     }
 
+    private boolean isUserActivelyJoined(Integer userId, Integer lunchEventId) {
+        Optional<Register> register = registerRepository.findByUserIdAndLunchEventIdAndStatus(
+                userId, lunchEventId, Status.ACTIVE.getCode());
+        return register.isPresent();
+    }
 
+    private boolean isUserCreator(Integer userId, Integer creatorId) {
+        return creatorId.equals(userId);
+    }
 
+    private static void updateLunchEventAvailability(LunchEvent lunchEvent) {
+        if (lunchEvent.getPaxAvailable() <= 0) {
+            lunchEvent.setStatus(Status.FULL.getCode());
+            lunchEvent.setIsAvailable(false);
+        } else {
+            lunchEvent.setStatus(Status.ACTIVE.getCode());
+            lunchEvent.setIsAvailable(true);
+        }
+    }
+
+    private void updateAndSaveLunchEventDetails(CreateLunchEventRequest createLunchEventRequest, LunchEvent lunchEvent, Restaurant restaurant, int currentPaxCount) {
+        lunchEvent.setRestaurant(restaurant);
+        lunchEvent.setDate(createLunchEventRequest.getDate());
+        lunchEvent.setTime(createLunchEventRequest.getTime());
+        lunchEvent.setPaxTotal(createLunchEventRequest.getPaxTotal());
+        lunchEvent.setPaxAvailable(createLunchEventRequest.getPaxTotal() - currentPaxCount);
+        updateLunchEventAvailability(lunchEvent);
+        lunchEventRepository.save(lunchEvent);
+    }
+
+    private void updateCreatedLunchEventStatusAfterCancellation(LunchEvent lunchEvent) {
+        lunchEvent.setStatus(Status.CANCELLED.getCode());
+        lunchEvent.setIsAvailable(false);
+        lunchEventRepository.save(lunchEvent);
+    }
+
+    private void updateJoinedLunchStatusAfterCancellation(LunchEvent lunchEvent) {
+        if (Status.FULL.getCode().equals(lunchEvent.getStatus()) && lunchEvent.getPaxAvailable() > 0) {
+            lunchEvent.setStatus(Status.ACTIVE.getCode());
+            lunchEvent.setIsAvailable(true);
+        }
+    }
+
+    private void saveLunchEvent(LunchEvent lunchEvent) {
+        lunchEventRepository.save(lunchEvent);
+    }
+
+    private void saveRegister(Register register) {
+        registerRepository.save(register);
+    }
 
 }
-
-
-
-
-
