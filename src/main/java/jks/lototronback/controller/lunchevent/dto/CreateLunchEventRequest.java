@@ -27,6 +27,6 @@ public class CreateLunchEventRequest {
             example = "12:30:00",
             format = "time",
             required = true)
-    @JsonFormat(pattern = "HH:mm:ss")
+    @JsonFormat(pattern = "HH:mm[:ss]")
     private LocalTime time;
 }
