@@ -43,4 +43,7 @@ public interface RegisterRepository extends JpaRepository<Register, Integer> {
     default List<Register> findByUserIdAndLunchEventDate(Integer userId, LocalDate date) {
         return findByUserIdAndLunchEventDate(userId, date, Status.CANCELLED.getCode());
     }
+
+    Optional<Register> findByUserIdAndLunchEventIdAndStatus(Integer userId, Integer lunchEventId, String status);
+
 }

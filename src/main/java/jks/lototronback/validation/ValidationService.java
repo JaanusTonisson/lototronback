@@ -60,8 +60,8 @@ public class ValidationService {
         }
     }
 
-    public static void validateSufficientSeats(int newPaxTotal, int currentJoinCount) {
-        if (newPaxTotal < currentJoinCount) {
+    public static void validateSufficientSeats(int newPaxTotal, int currentPaxCount) {
+        if (newPaxTotal < currentPaxCount) {
             throw new ForbiddenException("Sa ei saa vähendada lõunatajate koguarvu väiksemaks kui on liitujaid", 2010);
         }
     }
