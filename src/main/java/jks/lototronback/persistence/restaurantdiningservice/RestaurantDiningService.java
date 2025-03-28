@@ -25,7 +25,7 @@ public class RestaurantDiningService {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_id", nullable = false)
+    @JoinColumn(name = "dining_service_id", nullable = false)
     private DiningService diningService;
 
 }

@@ -42,12 +42,12 @@ public class CalendarService {
         LocalDate today = LocalDate.now();
 
         while (!currentDate.isAfter(endDate)) {
-            // Only include workdays (Monday to Friday) from today onwards
+
             if (!currentDate.isBefore(today) && ValidationService.isWorkday(currentDate)) {
                 WorkdayDto workdayDto = new WorkdayDto();
                 workdayDto.setDate(currentDate);
 
-                // Check for available lunches on this day
+
                 Integer availableLunchCount = lunchEventRepository.countAvailableLunchesByDate(currentDate);
                 workdayDto.setHasAvailableLunches(availableLunchCount > 0);
                 workdayDto.setAvailableLunchCount(availableLunchCount);

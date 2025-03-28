@@ -35,9 +35,8 @@ public class UserService {
 
 
     public User getValidatedUser(Integer userId) {
-        User user = userRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
-        return user;
     }
 
     @Transactional

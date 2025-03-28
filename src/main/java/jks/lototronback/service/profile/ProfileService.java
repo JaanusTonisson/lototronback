@@ -53,15 +53,11 @@ public class ProfileService {
         Optional<UserImage> userImageOptional = userImageRepository.findUserImageByUserId(userId);
 
         if (imageData == null || imageData.isEmpty()) {
-            // Delete existing image if any
-            if (userImageOptional.isPresent()) {
-                userImageRepository.delete(userImageOptional.get());
-            }
+            userImageOptional.ifPresent(userImageRepository::delete);
             return;
         }
 
         if (userImageOptional.isEmpty()) {
-            // Create new image
             UserImage userImage = new UserImage();
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
@@ -69,25 +65,20 @@ public class ProfileService {
             userImage.setData(BytesConverter.stringToBytesArray(imageData));
             userImageRepository.save(userImage);
         } else {
-            // Update existing image
             UserImage userImage = userImageOptional.get();
             userImage.setData(BytesConverter.stringToBytesArray(imageData));
             userImageRepository.save(userImage);
         }
     }
     private Profile getValidProfile(Integer userId) {
-        Profile profile = profileRepository.findProfileBy(userId)
+        return profileRepository.findProfileBy(userId)
                 .orElseThrow(() -> ValidationService.throwForeignKeyNotFoundException("userId", userId));
-        return profile;
     }
 
     @Transactional
     public void deleteProfileImage(Integer userId) {
         Optional<UserImage> userImageOptional = userImageRepository.findUserImageByUserId(userId);
 
-        if (userImageOptional.isPresent()) {
-            userImageRepository.delete(userImageOptional.get());
-        }
-        // If there's no image, we don't need to do anything
+        userImageOptional.ifPresent(userImageRepository::delete);
     }
 }

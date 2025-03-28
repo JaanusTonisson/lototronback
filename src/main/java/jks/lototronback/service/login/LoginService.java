@@ -23,7 +23,6 @@ public class LoginService {
     public LoginResponse login(String username, String password) {
         Optional<User> optionalUser = userRepository.findUserBy(username, password, ACTIVE.getCode());
         User user = optionalUser.orElseThrow(() -> new ForbiddenException(Error.INCORRECT_CREDENTIALS.getMessage(), Error.INCORRECT_CREDENTIALS.getErrorCode()));
-        LoginResponse loginResponse = userMapper.toLoginResponse(user);
-        return loginResponse;
+        return userMapper.toLoginResponse(user);
     }
 }
