@@ -28,6 +28,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class LunchEventService {
+
     private final UserService userService;
     private final MessageService messageService;
     private final LunchEventMapper lunchEventMapper;
