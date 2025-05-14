@@ -29,7 +29,6 @@ spring.datasource.url=jdbc:postgresql://localhost/lototron
 spring.datasource.username=postgres
 spring.datasource.password=student123
 ```
-*(Note: It's generally recommended to use environment variables or external configuration for production secrets instead of hardcoding in `application.properties`.)*
 
 ### Build & Run Application
 
